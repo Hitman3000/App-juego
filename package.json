@@ -1,0 +1,26 @@
+{
+  "name": "juego",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "serve": "npx cap serve",
+    "sync": "npx cap sync",
+    "android": "npx cap open android",
+    "build:apk": "cd android && gradlew assembleDebug",
+    "build:aab": "cd android && gradlew bundleRelease"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/ios": "^8.5.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
