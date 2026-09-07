@@ -162,12 +162,19 @@ const AudioJuego = (() => {
   return {
     iniciar: iniciar,
     tocarPuerta: tocarPuerta,
+    puerta: tocarPuerta,
     papel: papel,
     acierto: acierto,
     error: error,
     ddd: ddd,
+    alarma: ddd,
     abrirPuerta: abrirPuerta,
+    persiana: abrirPuerta,
     click: click,
+    sello: click,
+    moneda: acierto,
+    fanfarria: acierto,
+    timbre: tocarPuerta,
     cambiarSilencio: cambiarSilencio
   };
 })();

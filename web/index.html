@@ -1,124 +1,212 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0a0604">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>D.D.D. — Admisión & Control</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Special+Elite&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <title>LOGIC-PLAY UPTT — Inspector Lógico</title>
+
   <link rel="stylesheet" href="css/estilos.css">
 </head>
+
 <body>
 
-  <!-- HUD superpuesto (no resta altura a la escena) -->
+  <!-- HUD superior compacto -->
   <header id="cabecera">
     <div class="cab-izq">
-      <div class="cab-titulo">D.D.D. ADMISIÓN</div>
-      <div id="info-dia">Día 1 · Visitante 1/3</div>
+      <span class="cab-titulo">LOGIC-PLAY</span>
+      <span id="info-dia">Nivel 1 · 0/5</span>
     </div>
-    <div id="info-vidas"></div>
+    <div class="cab-der">
+      <span id="info-score">0 pts</span>
+      <span id="info-vidas">❤️❤️❤️</span>
+    </div>
   </header>
 
   <main id="escena">
 
+    <!-- Ventanilla con el visitante/estudiante -->
     <div id="zona-persona">
-      <canvas id="persona" width="220" height="300"></canvas>
+      <img id="persona" class="persona-sprite" alt="Visitante en Ventanilla" src="img/estudiantes/carlos.png">
     </div>
 
+    <!-- Globo de diálogo del visitante -->
     <div id="burbuja"></div>
 
-    <div id="persiana">
-      <div class="persiana-franjas"></div>
-      <div class="persiana-texto">⛔ BLOQUEADO</div>
+    <!-- Cajón / Rollo de la Santa María (persiana metálica de seguridad de la ventanilla) -->
+    <div id="santa-maria-caja" class="santa-maria-caja" title=" — Persiana Metálica de Seguridad">
+      <div class="santa-maria-lamas"></div>
+      <div class="santa-maria-display">
+        <span id="sm-led" class="sm-punto-led"></span>
+        <span id="sm-texto"> · VENTANILLA ABIERTA</span>
+      </div>
     </div>
 
-    <!-- Documento que el visitante entrega por la ventanilla -->
-    <div id="dni-mesa" class="oculto-mesa" title="Clic para inspeccionar">
+    <!-- Persiana metálica de bloqueo (desciende al activarse alarma o error) -->
+    <div id="persiana">
+      <div class="persiana-franjas"></div>
+      <div class="persiana-texto">⛔ EXPEDIENTE CERRADO</div>
+    </div>
+
+    <!-- Ficha de caso entregada en el escritorio -->
+    <div id="dni-mesa" class="oculto-mesa" title="Toca para inspeccionar el caso formal">
       <div class="dni-mini">
-        <div class="dni-mini-foto"></div>
+        <div class="ficha-mini-sello">UPTT</div>
         <div class="dni-mini-lineas">
-          <span></span><span></span><span></span>
+          <span class="linea-destacada">CASO LÓGICO</span>
+          <span></span>
+          <span></span>
         </div>
       </div>
     </div>
 
-    <div id="hit-lock" class="hit-zona" title="Seguridad — Bloquear"></div>
-    <div id="hit-unlock" class="hit-zona" title="Dejar pasar"></div>
+    <!-- Sellos / Botones de Decisión (Adaptados por Nivel) -->
+    <div id="hit-lock" class="hit-zona sello-rechazar" title="Falso (F)">
+      <span class="hit-etiqueta" id="lbl-sello-izq">F</span>
+    </div>
+    <div id="hit-unlock" class="hit-zona sello-admitir" title="Verdadero (V)">
+      <span class="hit-etiqueta" id="lbl-sello-der">V</span>
+    </div>
 
-    <!-- Bombillo de estado (arriba izquierda) — no es botón -->
+    <!-- Bombillo de estado luminoso -->
     <div id="bombillo" class="gris" aria-hidden="true"></div>
 
-    <!-- Lista de autorizados: pila de papeles del escritorio -->
-    <div id="hit-papeles" class="hit-zona" title="Lista de residentes autorizados"></div>
+    <!-- Placa de nivel en la pared (cubre el LEVEL 3 estático de la imagen original) -->
+    <div id="chapa-nivel-pared" class="chapa-nivel-pared" title="Nivel de Inspección">NIVEL 1</div>
+
+    <!-- Pila de papeles del escritorio: MANUAL DEL INSPECTOR -->
+    <div id="hit-papeles" class="hit-zona" title="Consultar Manual del Inspector Lógico">
+      <div class="etiqueta-manual-escritorio">MANUAL DEL INSPECTOR</div>
+    </div>
 
     <div id="luz-alarma"></div>
 
+    <!-- EXPEDIENTE / FICHA DEL CASO (Inspección en detalle) -->
     <div id="dni" class="oculto">
+      <button id="btn-cerrar-dni" class="dni-cerrar" title="Cerrar Ficha">✕</button>
       <div class="dni-encabezado">
-        <span class="dni-titulo">IDENTIFICACIÓN OFICIAL</span>
-        <span class="dni-num">Nº 4521</span>
+        <div class="sello-institucional">UPTTMBI · PNFI</div>
+        <div class="dni-titulos-bloque">
+          <span class="dni-titulo">EXPEDIENTE DE EVALUACIÓN LÓGICA</span>
+          <span id="caso-numero-tag" class="dni-num">EXPEDIENTE DE ADMISIÓN</span>
+        </div>
       </div>
       <div class="dni-cuerpo">
-        <canvas id="foto-dni" width="90" height="120"></canvas>
+        <img id="foto-dni" class="foto-dni-img" alt="Foto Carnet" src="img/estudiantes/carlos.jpg">
         <div id="dni-datos"></div>
       </div>
+
+      <!-- Enunciado destacado del caso -->
+      <div id="zona-enunciado-caso" class="caja-enunciado">
+        <div class="etiqueta-enunciado">ENUNCIADO EN REVISIÓN:</div>
+        <div id="texto-enunciado" class="texto-caso-formal">...</div>
+      </div>
+
       <div id="dni-fechas"></div>
-      <div class="dni-firma">— Firma del titular —</div>
-      <button id="btn-cerrar-dni" class="dni-cerrar">✕</button>
+      <div class="dni-firma">— Departamento de Lógica y Algorítmica —</div>
     </div>
 
   </main>
 
+  <!-- Modal de Feedback Pedagógico Inmediato -->
   <div id="modal" class="oculto">
-    <div class="modal-caja">
-      <div id="modal-icono"></div>
+    <div class="modal-caja modal-feedback-caja">
+      <div id="modal-icono" class="modal-icono-anim"></div>
       <h2 id="modal-titulo"></h2>
-      <p id="modal-texto"></p>
-      <button id="btn-modal" class="btn-continuar">Continuar</button>
+      <div id="modal-subtitulo" class="modal-sub"></div>
+      <div id="modal-caja-explicacion" class="caja-explicacion">
+        <p id="modal-texto"></p>
+        <div id="modal-detalle-adicional" class="detalle-extra"></div>
+      </div>
+      <button id="btn-modal" class="btn-continuar">Continuar Inspección</button>
     </div>
   </div>
 
-  <!-- Lista estilo expediente / carpeta de papeles -->
+  <!-- MANUAL DEL INSPECTOR LÓGICO (Dossier interactivo con pestañas de los 5 niveles) -->
   <div id="modal-lista" class="oculto">
-    <div class="expediente">
-      <div class="expediente-clip"></div>
+    <div class="expediente expediente-manual">
       <div class="expediente-cabecera">
         <div>
-          <div class="exp-sello">CONFIDENCIAL</div>
-          <h2>Registro de residentes</h2>
-          <p class="exp-sub">Unidad 014 · Autorizados a ingresar</p>
+          <div class="exp-sello">OFICIAL · UPTTMBI</div>
+          <h2>Manual del Inspector Lógico</h2>
+          <p class="exp-sub">Guía de referencia teórica y criterios de dictamen</p>
         </div>
-        <button id="btn-cerrar-lista" class="exp-cerrar" title="Cerrar">✕</button>
+        <button id="btn-cerrar-lista" class="exp-cerrar" title="Cerrar Manual">✕</button>
       </div>
-      <div id="lista-residentes"></div>
-      <div class="expediente-pie">D.D.D. — Verificar rasgos y documento antes de autorizar</div>
+
+      <!-- Pestañas de niveles para navegar la teoría -->
+      <nav class="manual-pestanas">
+        <button class="pestana-btn activa" data-nivel="1" title="Nivel 1: Abstracción"><span class="tab-txt-full">Nivel
+          </span>1</button>
+        <button class="pestana-btn" data-nivel="2" title="Nivel 2: Segmentación"><span class="tab-txt-full">Nivel
+          </span>2</button>
+        <button class="pestana-btn" data-nivel="3" title="Nivel 3: Formalización"><span class="tab-txt-full">Nivel
+          </span>3</button>
+        <button class="pestana-btn" data-nivel="4" title="Nivel 4: Validación"><span class="tab-txt-full">Nivel
+          </span>4</button>
+        <button class="pestana-btn" data-nivel="5" title="Nivel 5: Inferencia"><span class="tab-txt-full">Nivel
+          </span>5</button>
+      </nav>
+
+      <!-- Contenedor dinámico de la teoría del nivel seleccionado -->
+      <div id="contenido-manual" class="manual-cuerpo"></div>
+
+      <div class="expediente-pie">Logic-Play UPTT — Consulta este manual en cualquier momento del turno.</div>
     </div>
   </div>
 
+  <!-- Modal de Inicio de Turno / Misión -->
   <div id="modal-inicio" class="oculto">
     <div class="modal-caja modal-inicio-caja">
-      <div class="logo-inicio">🏛️</div>
-      <h2>RESIDENCIAS BUENAVISTA</h2>
-      <p class="subtitulo">D.D.D. — Puesto de Admisión 014</p>
-      <ul id="reglas">
-        <li>El visitante aparece en la <b>ventanilla</b> y entrega su documento por la ranura.</li>
-        <li>Toca el <b>documento</b> en la ventana para inspeccionarlo.</li>
-        <li>Toca la <b>pila de papeles</b> del escritorio para ver quiénes pueden ingresar.</li>
-        <li>Presiona <b>UNLOCK</b> para dejar pasar, o <b>LOCK</b> para bloquear.</li>
-        <li>Si dejas pasar a alguien correcto, el <b>bombillo</b> de arriba a la izquierda se pone verde.</li>
-        <li>Cada error cuesta una vida ❤️. ¡Sobrevive 3 turnos!</li>
+      <div class="logo-inicio">⚖️</div>
+      <h2>LOGIC-PLAY UPTT</h2>
+      <p class="subtitulo">Inspector Lógico — Puesto de Admisión Proposicional</p>
+
+      <div class="inicio-campos-grid">
+        <div id="nombre-input-group">
+          <label for="input-nombre" class="nombre-label">Nombre del Inspector:</label>
+          <input type="text" id="input-nombre" class="nombre-input" placeholder="Ej: Inspector(a) Carlos" maxlength="50"
+            autocomplete="off">
+        </div>
+
+        <div class="selector-nivel-group">
+          <label for="select-nivel-inicio" class="nombre-label">Comenzar en nivel:</label>
+          <select id="select-nivel-inicio" class="nivel-select">
+            <option value="1">Nivel 1 — Abstracción Formal (Proposiciones vs No Proposiciones)</option>
+            <option value="2">Nivel 2 — Segmentación Estructural (Variables y Negaciones)</option>
+            <option value="3">Nivel 3 — Formalización Simbólica (7 Conectivos)</option>
+            <option value="4">Nivel 4 — Validación (Tablas de Verdad)</option>
+            <option value="5">Nivel 5 — Inferencia Lógica (Argumentos y Falacias)</option>
+          </select>
+        </div>
+      </div>
+
+      <ul id="reglas" class="reglas-grid">
+        <li>Examina el <b>caso de estudio lógico</b> presentado en ventanilla.</li>
+        <li>Toca la <b>ficha en la mesa</b> para leer el enunciado completo.</li>
+        <li>Consulta el <b>Manual del Inspector</b> para verificar reglas y teoría.</li>
+        <li>Aplica el sello correspondiente según el nivel activo.</li>
+        <li>Los errores restan vidas y ofrecen <b>feedback explicativo</b>.</li>
+        <li>Alcanza <b>5 aciertos</b> para superar el nivel de inspección.</li>
       </ul>
-      <button id="btn-comenzar" class="btn-continuar btn-inicio">Comenzar turno</button>
+      <button id="btn-comenzar" class="btn-continuar btn-inicio">Iniciar Turno de Inspección</button>
     </div>
   </div>
 
+  <!-- Scripts en orden de dependencias -->
+  <script src="js/casos_logica.js"></script>
+  <script src="js/manual_teoria.js"></script>
   <script src="js/datos.js"></script>
   <script src="js/rostros.js"></script>
+  <script src="js/audio.js"></script>
   <script src="js/generador.js"></script>
   <script src="js/reglas.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/sync.js"></script>
   <script src="js/main.js"></script>
 </body>
+
 </html>

@@ -1,0 +1,305 @@
+@font-face {
+  font-family: 'VT323';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../web/fonts/VT323.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Share Tech Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../web/fonts/ShareTechMono.woff2') format('woff2');
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0604;
+  --panel-bg: #1a1208;
+  --panel-border: #3a2a14;
+  --verde: #e8c060;
+  --verde-claro: #f0d890;
+  --texto: #d8c8a8;
+  --suave: #8a7a60;
+  --rojo: #c0392b;
+  --verde-bright: #2ecc71;
+}
+
+body {
+  background: var(--bg);
+  color: var(--texto);
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+}
+
+/* Header */
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--panel-border);
+  background: rgba(8, 6, 4, 0.95);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-izq h1 {
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: var(--verde);
+}
+
+.header-sub {
+  font-size: 11px;
+  color: var(--suave);
+  margin-top: 2px;
+}
+
+.header-der {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-offline {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(192, 57, 43, 0.3);
+  border: 1px solid var(--rojo);
+  color: var(--rojo);
+  letter-spacing: 2px;
+}
+
+.status-online {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(46, 204, 113, 0.15);
+  border: 1px solid var(--verde-bright);
+  color: var(--verde-bright);
+  letter-spacing: 2px;
+}
+
+.btn-icon {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  color: var(--verde);
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-icon:hover { border-color: var(--verde); background: #2a1a0c; }
+
+/* Main */
+#contenido {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Panels */
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.panel-titulo {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--verde);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(90, 60, 30, 0.3);
+  border-radius: 6px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.stat-num {
+  font-family: 'VT323', monospace;
+  font-size: 32px;
+  color: var(--verde-claro);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--suave);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Ranking Tabs */
+.ranking-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--suave);
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tab-btn.active {
+  background: rgba(232, 192, 96, 0.12);
+  border-color: var(--verde);
+  color: var(--verde);
+}
+
+.tab-btn:hover { border-color: var(--verde); }
+
+/* Ranking Table */
+.tabla-container { overflow-x: auto; }
+
+.tabla-ranking {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabla-ranking th {
+  font-family: 'VT323', monospace;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--suave);
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--panel-border);
+  white-space: nowrap;
+}
+
+.tabla-ranking td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(58, 42, 20, 0.4);
+  white-space: nowrap;
+}
+
+.tabla-ranking tr:hover td { background: rgba(232, 192, 96, 0.04); }
+
+.pos-1 { color: #ffd700; font-family: 'VT323', monospace; font-size: 18px; }
+.pos-2 { color: #c0c0c0; font-family: 'VT323', monospace; font-size: 18px; }
+.pos-3 { color: #cd7f32; font-family: 'VT323', monospace; font-size: 18px; }
+.pos-n { color: var(--suave); font-family: 'VT323', monospace; font-size: 16px; }
+
+.nombre-jugador {
+  color: var(--verde-claro);
+  font-weight: bold;
+}
+
+.nivel-badge {
+  display: inline-block;
+  background: rgba(232, 192, 96, 0.15);
+  border: 1px solid rgba(232, 192, 96, 0.3);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: var(--verde);
+}
+
+.precision-bar {
+  display: inline-block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--verde-bright);
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* Chart */
+.chart-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 140px;
+  padding-top: 10px;
+}
+
+.chart-bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.chart-fill {
+  width: 100%;
+  max-width: 60px;
+  background: linear-gradient(180deg, var(--verde) 0%, rgba(232, 192, 96, 0.4) 100%);
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+  transition: height 0.5s ease;
+}
+
+.chart-label {
+  font-family: 'VT323', monospace;
+  font-size: 13px;
+  color: var(--suave);
+}
+
+.chart-count {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: var(--verde-claro);
+}
+
+/* Cargando / Vacío */
+.cargando, .vacio {
+  text-align: center;
+  padding: 30px;
+  color: var(--suave);
+  font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  #header { flex-direction: column; gap: 8px; text-align: center; }
+  .header-izq h1 { font-size: 22px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-num { font-size: 26px; }
+  .tabla-ranking { font-size: 11px; }
+  .tabla-ranking th, .tabla-ranking td { padding: 6px; }
+}

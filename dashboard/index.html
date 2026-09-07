@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D.D.D. — Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header id="header">
+    <div class="header-izq">
+      <h1>D.D.D. — DASHBOARD</h1>
+      <p class="header-sub">Residencias Buenavista · Estadísticas y Rankings</p>
+    </div>
+    <div class="header-der">
+      <span id="online-status" class="status-offline">OFFLINE</span>
+      <button id="btn-refresh" class="btn-icon" title="Actualizar">⟳</button>
+    </div>
+  </header>
+
+  <main id="contenido">
+
+    <section id="stats-global" class="panel">
+      <h2 class="panel-titulo">Estadísticas Globales</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-jugadores">--</div>
+          <div class="stat-label">Jugadores</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-partidas">--</div>
+          <div class="stat-label">Partidas jugadas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-promedio">--</div>
+          <div class="stat-label">Puntaje promedio</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-maxima">--</div>
+          <div class="stat-label">Puntaje máximo</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-precision">--</div>
+          <div class="stat-label">Precisión global</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-inspecciones">--</div>
+          <div class="stat-label">Insp. promedio/doc</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="seccion-ranking" class="panel">
+      <h2 class="panel-titulo">Ranking Top 20</h2>
+      <div class="ranking-tabs">
+        <button class="tab-btn active" data-orden="mejor_puntuacion">Mejor Puntaje</button>
+        <button class="tab-btn" data-orden="promedio_puntuacion">Promedio</button>
+        <button class="tab-btn" data-orden="precision_pct">Precisión</button>
+      </div>
+      <div id="tabla-ranking" class="tabla-container">
+        <div class="cargando">Cargando ranking...</div>
+      </div>
+    </section>
+
+    <section id="seccion-niveles" class="panel">
+      <h2 class="panel-titulo">Distribución por Nivel</h2>
+      <div id="chart-niveles" class="chart-container"></div>
+    </section>
+
+  </main>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

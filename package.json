@@ -8,7 +8,10 @@
     "sync": "npx cap sync",
     "android": "npx cap open android",
     "build:apk": "cd android && gradlew assembleDebug",
-    "build:aab": "cd android && gradlew bundleRelease"
+    "build:aab": "cd android && gradlew bundleRelease",
+    "api": "cd api && node server.js",
+    "dashboard": "npx http-server dashboard -p 3001",
+    "dev": "concurrently \"npm run api\" \"npm run dashboard\""
   },
   "keywords": [],
   "author": "",
@@ -21,6 +24,7 @@
     "@capacitor/ios": "^8.5.0"
   },
   "devDependencies": {
+    "concurrently": "^9.0.1",
     "http-server": "^14.1.1"
   }
 }
