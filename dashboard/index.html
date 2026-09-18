@@ -4,71 +4,153 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>D.D.D. — Dashboard</title>
+  <meta name="description" content="Dashboard de estadísticas y rankings de D.D.D. — Residencias Buenavista">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
+  <!-- HEADER -->
   <header id="header">
-    <div class="header-izq">
-      <h1>D.D.D. — DASHBOARD</h1>
-      <p class="header-sub">Residencias Buenavista · Estadísticas y Rankings</p>
+    <div class="header-brand">
+      <div class="brand-icon">⚠</div>
+      <div class="brand-text">
+        <h1>D.D.D.</h1>
+        <span class="brand-sub">CONTROL DE OPERACIONES · RESIDENCIAS BUENAVISTA</span>
+      </div>
     </div>
-    <div class="header-der">
-      <span id="online-status" class="status-offline">OFFLINE</span>
-      <button id="btn-refresh" class="btn-icon" title="Actualizar">⟳</button>
+    <div class="header-center">
+      <div class="clock-block">
+        <span id="reloj-hora" class="clock-time">--:--:--</span>
+        <span id="reloj-fecha" class="clock-date">---</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div id="db-indicator" class="db-indicator">
+        <span class="indicator-dot"></span>
+        <span id="db-label">CONECTANDO</span>
+      </div>
+      <button id="btn-refresh" class="btn-refresh" title="Actualizar datos">
+        <span class="refresh-icon">⟳</span>
+        <span class="refresh-label">ACTUALIZAR</span>
+      </button>
+      <div class="last-update-block">
+        <span class="last-update-label">ÚLTIMA ACT.</span>
+        <span id="last-update-time" class="last-update-time">--:--</span>
+      </div>
     </div>
   </header>
 
-  <main id="contenido">
-
-    <section id="stats-global" class="panel">
-      <h2 class="panel-titulo">Estadísticas Globales</h2>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-num" id="stat-jugadores">--</div>
-          <div class="stat-label">Jugadores</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-partidas">--</div>
-          <div class="stat-label">Partidas jugadas</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-promedio">--</div>
-          <div class="stat-label">Puntaje promedio</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-maxima">--</div>
-          <div class="stat-label">Puntaje máximo</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-precision">--</div>
-          <div class="stat-label">Precisión global</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-inspecciones">--</div>
-          <div class="stat-label">Insp. promedio/doc</div>
-        </div>
+  <!-- KPI BAR -->
+  <section id="kpi-bar">
+    <div class="kpi-card" id="kpi-jugadores">
+      <div class="kpi-icon">👤</div>
+      <div class="kpi-body">
+        <div class="kpi-num" id="stat-jugadores">--</div>
+        <div class="kpi-label">JUGADORES</div>
       </div>
-    </section>
+      <div class="kpi-glow"></div>
+    </div>
+    <div class="kpi-card" id="kpi-partidas">
+      <div class="kpi-icon">🎮</div>
+      <div class="kpi-body">
+        <div class="kpi-num" id="stat-partidas">--</div>
+        <div class="kpi-label">PARTIDAS</div>
+      </div>
+      <div class="kpi-glow"></div>
+    </div>
+    <div class="kpi-card" id="kpi-promedio">
+      <div class="kpi-icon">📈</div>
+      <div class="kpi-body">
+        <div class="kpi-num" id="stat-promedio">--</div>
+        <div class="kpi-label">PUNTAJE PROMEDIO</div>
+      </div>
+      <div class="kpi-glow"></div>
+    </div>
+    <div class="kpi-card kpi-highlight" id="kpi-maxima">
+      <div class="kpi-icon">🏆</div>
+      <div class="kpi-body">
+        <div class="kpi-num" id="stat-maxima">--</div>
+        <div class="kpi-label">RÉCORD MÁXIMO</div>
+      </div>
+      <div class="kpi-glow"></div>
+    </div>
+    <div class="kpi-card" id="kpi-precision">
+      <div class="kpi-icon">🎯</div>
+      <div class="kpi-body">
+        <div class="kpi-num" id="stat-precision">--</div>
+        <div class="kpi-label">PRECISIÓN GLOBAL</div>
+      </div>
+      <div class="kpi-glow"></div>
+    </div>
+    <div class="kpi-card" id="kpi-inspecciones">
+      <div class="kpi-icon">🔍</div>
+      <div class="kpi-body">
+        <div class="kpi-num" id="stat-inspecciones">--</div>
+        <div class="kpi-label">INSP./DOCUMENTO</div>
+      </div>
+      <div class="kpi-glow"></div>
+    </div>
+  </section>
 
-    <section id="seccion-ranking" class="panel">
-      <h2 class="panel-titulo">Ranking Top 20</h2>
-      <div class="ranking-tabs">
-        <button class="tab-btn active" data-orden="mejor_puntuacion">Mejor Puntaje</button>
-        <button class="tab-btn" data-orden="promedio_puntuacion">Promedio</button>
-        <button class="tab-btn" data-orden="precision_pct">Precisión</button>
+  <!-- MAIN GRID -->
+  <main id="main-grid">
+
+    <!-- RANKING -->
+    <section class="panel panel-ranking">
+      <div class="panel-header">
+        <div class="panel-title-group">
+          <span class="panel-icon">🏅</span>
+          <h2 class="panel-title">RANKING TOP 20</h2>
+        </div>
+        <div class="ranking-tabs" id="ranking-tabs">
+          <button class="tab-btn active" data-orden="mejor_puntuacion">MEJOR</button>
+          <button class="tab-btn" data-orden="promedio_puntuacion">PROMEDIO</button>
+          <button class="tab-btn" data-orden="precision_pct">PRECISIÓN</button>
+        </div>
       </div>
       <div id="tabla-ranking" class="tabla-container">
-        <div class="cargando">Cargando ranking...</div>
+        <div class="cargando"><span class="spinner">◌</span> Cargando ranking...</div>
       </div>
     </section>
 
-    <section id="seccion-niveles" class="panel">
-      <h2 class="panel-titulo">Distribución por Nivel</h2>
-      <div id="chart-niveles" class="chart-container"></div>
-    </section>
+    <!-- SIDE PANELS -->
+    <aside class="side-panels">
+
+      <!-- CHART NIVELES -->
+      <section class="panel panel-chart">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <span class="panel-icon">📊</span>
+            <h2 class="panel-title">DISTRIBUCIÓN POR NIVEL</h2>
+          </div>
+        </div>
+        <div id="chart-niveles" class="chart-container">
+          <div class="cargando"><span class="spinner">◌</span> Cargando...</div>
+        </div>
+      </section>
+
+      <!-- ACTIVIDAD RECIENTE / TOP 3 -->
+      <section class="panel panel-podio">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <span class="panel-icon">👑</span>
+            <h2 class="panel-title">PODIO</h2>
+          </div>
+        </div>
+        <div id="podio-container" class="podio-container">
+          <div class="cargando"><span class="spinner">◌</span> Cargando...</div>
+        </div>
+      </section>
+
+    </aside>
 
   </main>
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <span>D.D.D. SISTEMA DE CONTROL — RESIDENCIAS BUENAVISTA</span>
+    <span id="footer-stats">Actualización automática cada 30 seg.</span>
+  </footer>
 
   <script src="js/dashboard.js"></script>
 </body>

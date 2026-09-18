@@ -43,28 +43,23 @@ function siguienteCaso() {
 
 function finDeNivel() {
   syncStats();
-  if (typeof AudioJuego !== "undefined") AudioJuego.fanfarria();
 
   if (estado.dia >= CONFIG.NIVELES_TOTALES) {
+    if (typeof AudioJuego !== "undefined") AudioJuego.fanfarria();
+    const nombreJugador = (typeof SyncManager !== "undefined" && SyncManager.obtenerNombre())
+      ? SyncManager.obtenerNombre()
+      : "Inspector(a)";
     mostrarModalFeedback(
       true,
       "¡DICTAMEN GLOBAL COMPLETADO!",
       "Inspector Oficial del PNFI - UPTTMBI",
-      "Has superado con éxito los 5 niveles del Manual del Inspector Lógico. Puntuación final: " + estado.puntos + " pts.",
-      "Demostraste dominio en Abstracción, Segmentación, Formalización, Validación e Inferencia.",
+      "¡Felicitaciones, " + nombreJugador + "! Has superado con éxito los 5 niveles del Manual del Inspector Lógico con " + estado.puntos + " pts.",
+      "🎖️ GRAN PREMIO DESBLOQUEADO: Título de Magister Lógico Honorífico del PNFI — Dominio pleno en Proposiciones, Negaciones, Formalización, Validación e Inferencia.",
       reiniciar
     );
   } else {
     const siguiente = estado.dia + 1;
-    const infoSig = CONFIG.NIVELES_INFO[siguiente] || { nombre: "Nivel " + siguiente };
-    mostrarModalFeedback(
-      true,
-      "¡NIVEL " + estado.dia + " COMPLETADO!",
-      "5 Casos Analizados Correctamente",
-      "Puntuación acumulada: " + estado.puntos + " pts · Vidas restantes: " + estado.vidas,
-      "Próxima asignación: " + infoSig.nombre + " (" + infoSig.tema + ")",
-      () => comenzarNivel(siguiente)
-    );
+    mostrarFelicitacionNivel(siguiente, () => comenzarNivel(siguiente));
   }
 }
 

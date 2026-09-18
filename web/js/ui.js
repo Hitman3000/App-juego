@@ -219,16 +219,25 @@ function dispararAlarma(callback) {
 
 function renderCabecera(nivel, aciertos, meta, vidas, puntos) {
   if (infoDia) {
-    infoDia.textContent = (window.innerWidth <= 440 ? "N" : "Nivel ") + nivel + " · " + aciertos + "/" + meta;
+    const infoNivel = (typeof CONFIG !== "undefined" && CONFIG.NIVELES_INFO && CONFIG.NIVELES_INFO[nivel])
+      ? CONFIG.NIVELES_INFO[nivel]
+      : { tema: "Nivel " + nivel, nombre: "Nivel " + nivel };
+    const prefijo = window.innerWidth <= 440 ? "N" : "Nivel ";
+    infoDia.textContent = `${prefijo}${nivel}: ${infoNivel.tema} · ${aciertos}/${meta}`;
+    infoDia.title = `${infoNivel.nombre} (${aciertos}/${meta} aciertos)`;
   }
   const chapaPared = $("chapa-nivel-pared");
   if (chapaPared) {
     chapaPared.textContent = "NIVEL " + nivel;
+    if (typeof CONFIG !== "undefined" && CONFIG.NIVELES_INFO && CONFIG.NIVELES_INFO[nivel]) {
+      chapaPared.title = CONFIG.NIVELES_INFO[nivel].nombre;
+    }
   }
   const scoreEl = $("info-score");
   if (scoreEl) scoreEl.textContent = (puntos || 0) + " pts";
   let corazones = "";
-  for (let i = 0; i < CONFIG.VIDAS; i++) corazones += i < vidas ? "❤️" : "🖤";
+  const totalVidas = (typeof CONFIG !== "undefined" && CONFIG.VIDAS) ? CONFIG.VIDAS : 3;
+  for (let i = 0; i < totalVidas; i++) corazones += i < vidas ? "❤️" : "🖤";
   if (infoVidas) infoVidas.textContent = corazones;
 }
 
@@ -409,22 +418,31 @@ function ocultarModal() {
 /* ── Modal de Inicio de Turno ──────────────────────────────── */
 
 function mostrarInicio(alComenzar) {
-  const inicio = $("modal-inicio");
+  const inicio      = $("modal-inicio");
   const inputNombre = $("input-nombre");
   const selectNivel = $("select-nivel-inicio");
+
+  // Precarga el nombre si el jugador ya había jugado antes
   const nombreGuardado = SyncManager.obtenerNombre();
-  if (nombreGuardado && inputNombre) inputNombre.value = nombreGuardado;
+  if (nombreGuardado && inputNombre) {
+    inputNombre.value = nombreGuardado;
+  }
 
   inicio.classList.remove("oculto");
 
   $("btn-comenzar").onclick = () => {
-    const nombre = inputNombre.value.trim();
+    const nombre = inputNombre ? inputNombre.value.trim() : "";
     if (!nombre) {
-      inputNombre.style.borderColor = "#c0392b";
-      inputNombre.focus();
+      if (inputNombre) {
+        inputNombre.style.borderColor = "#c0392b";
+        inputNombre.focus();
+      }
       return;
     }
+
+    // Persiste el nombre (y genera el UUID si no existe todavía)
     SyncManager.guardarNombre(nombre);
+
     const nivelElegido = selectNivel ? parseInt(selectNivel.value) || 1 : 1;
     inicio.classList.add("oculto");
 
@@ -456,3 +474,257 @@ document.addEventListener("click", (e) => {
     renderManual(n);
   }
 });
+
+/* ── Control de Escala de Tipografía (+ / -) ─────────────────── */
+
+const ESCALAS_FUENTE = [0.85, 1.0, 1.15, 1.30, 1.45];
+let indiceEscalaActual = 1; // 1.0 (100%) por defecto
+let toastTimer = null;
+
+function aplicarEscalaFuente(escala, mostrarToast) {
+  document.documentElement.style.setProperty("--escala-fuente", escala);
+  try {
+    localStorage.setItem("logicplay_font_scale", escala);
+  } catch (e) {}
+
+  if (mostrarToast) {
+    const toast = $("toast-fuente");
+    if (toast) {
+      const porcentaje = Math.round(escala * 100);
+      toast.textContent = `Tipografía: ${porcentaje}%`;
+      toast.classList.remove("oculto");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add("oculto");
+      }, 1400);
+    }
+    if (typeof AudioJuego !== "undefined") AudioJuego.click();
+  }
+}
+
+function inicializarControlesFuente() {
+  const guardada = parseFloat(localStorage.getItem("logicplay_font_scale"));
+  if (!isNaN(guardada) && guardada >= 0.8 && guardada <= 1.6) {
+    let mejorIdx = 1;
+    let difMin = 999;
+    ESCALAS_FUENTE.forEach((val, idx) => {
+      const dif = Math.abs(val - guardada);
+      if (dif < difMin) {
+        difMin = dif;
+        mejorIdx = idx;
+      }
+    });
+    indiceEscalaActual = mejorIdx;
+    aplicarEscalaFuente(ESCALAS_FUENTE[indiceEscalaActual], false);
+  } else {
+    aplicarEscalaFuente(ESCALAS_FUENTE[indiceEscalaActual], false);
+  }
+
+  const btnMenos = $("btn-fuente-menos");
+  const btnMas = $("btn-fuente-mas");
+
+  if (btnMenos) {
+    const reducir = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (indiceEscalaActual > 0) {
+        indiceEscalaActual--;
+        aplicarEscalaFuente(ESCALAS_FUENTE[indiceEscalaActual], true);
+      }
+    };
+    btnMenos.addEventListener("click", reducir);
+    btnMenos.addEventListener("pointerdown", (e) => e.stopPropagation());
+  }
+
+  if (btnMas) {
+    const aumentar = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (indiceEscalaActual < ESCALAS_FUENTE.length - 1) {
+        indiceEscalaActual++;
+        aplicarEscalaFuente(ESCALAS_FUENTE[indiceEscalaActual], true);
+      }
+    };
+    btnMas.addEventListener("click", aumentar);
+    btnMas.addEventListener("pointerdown", (e) => e.stopPropagation());
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", inicializarControlesFuente);
+} else {
+  inicializarControlesFuente();
+}
+
+/* ── Confeti y Celebración Visual ───────────────────────────── */
+
+let animacionConfetiId = null;
+
+function lanzarConfeti() {
+  const canvas = $("confeti-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width || 420;
+  canvas.height = rect.height || 380;
+
+  const colores = ["#f7d070", "#4ade80", "#60a5fa", "#f87171", "#fbbf24", "#e879f9", "#ffffff"];
+  const particulas = [];
+  const cantidad = 65;
+
+  for (let i = 0; i < cantidad; i++) {
+    particulas.push({
+      x: canvas.width / 2 + (Math.random() - 0.5) * 90,
+      y: canvas.height * 0.35,
+      vx: (Math.random() - 0.5) * 8.5,
+      vy: -Math.random() * 7.5 - 2,
+      tam: Math.random() * 6 + 4,
+      color: colores[Math.floor(Math.random() * colores.length)],
+      rot: Math.random() * 360,
+      vrot: (Math.random() - 0.5) * 14,
+      gravedad: 0.16,
+      resistencia: 0.98,
+      opacidad: 1
+    });
+  }
+
+  let frames = 0;
+  if (animacionConfetiId) cancelAnimationFrame(animacionConfetiId);
+
+  function dibujar() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let vivas = 0;
+
+    particulas.forEach((p) => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += p.gravedad;
+      p.vx *= p.resistencia;
+      p.rot += p.vrot;
+
+      if (frames > 40) p.opacidad = Math.max(0, p.opacidad - 0.014);
+
+      if (p.opacidad > 0 && p.y < canvas.height + 20) {
+        vivas++;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rot * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.opacidad;
+        ctx.fillRect(-p.tam / 2, -p.tam / 2, p.tam, p.tam * 0.6);
+        ctx.restore();
+      }
+    });
+
+    frames++;
+    if (vivas > 0 && frames < 200) {
+      animacionConfetiId = requestAnimationFrame(dibujar);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      animacionConfetiId = null;
+    }
+  }
+
+  animacionConfetiId = requestAnimationFrame(dibujar);
+}
+
+function detenerConfeti() {
+  if (animacionConfetiId) {
+    cancelAnimationFrame(animacionConfetiId);
+    animacionConfetiId = null;
+  }
+  const canvas = $("confeti-canvas");
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+/* ── Modal de Felicitación / Subida de Nivel y Premios ───────── */
+
+function mostrarFelicitacionNivel(siguienteNivel, alContinuar) {
+  const modalPremio = $("modal-subida-nivel");
+  if (!modalPremio) {
+    if (alContinuar) alContinuar();
+    return;
+  }
+
+  const nombreJugador = (typeof SyncManager !== "undefined" && SyncManager.obtenerNombre())
+    ? SyncManager.obtenerNombre()
+    : "Inspector(a)";
+
+  const premio = (typeof PREMIOS_NIVELES !== "undefined" && PREMIOS_NIVELES[siguienteNivel])
+    ? PREMIOS_NIVELES[siguienteNivel]
+    : {
+        insignia: "⭐",
+        tituloPremio: "Avance de Misión Lógica",
+        bonoPuntos: 50,
+        regalo: "☕ Taza de Café del Inspector",
+        consejo: "Debes revisar el manual para seguir avanzando con éxito y dominar las nuevas reglas."
+      };
+
+  const infoNivel = (typeof CONFIG !== "undefined" && CONFIG.NIVELES_INFO && CONFIG.NIVELES_INFO[siguienteNivel])
+    ? CONFIG.NIVELES_INFO[siguienteNivel]
+    : { nombre: "Nivel " + siguienteNivel, tema: "Nivel " + siguienteNivel };
+
+  // Otorgar bono de puntos si estado existe
+  if (typeof estado !== "undefined" && premio.bonoPuntos) {
+    estado.puntos = (estado.puntos || 0) + premio.bonoPuntos;
+    renderCabecera(estado.dia, estado.aciertos, CONFIG.CASOS_POR_NIVEL, estado.vidas, estado.puntos);
+  }
+
+  const elInsignia = $("premio-insignia");
+  if (elInsignia) elInsignia.textContent = premio.insignia || "🎉";
+
+  const elTitulo = $("premio-felicitacion-titulo");
+  if (elTitulo) elTitulo.textContent = "¡Excelente!";
+
+  const elNombre = $("premio-nombre-inspector");
+  if (elNombre) elNombre.textContent = `¡Felicitaciones, ${nombreJugador}!`;
+
+  const elTag = $("premio-nivel-nombre");
+  if (elTag) elTag.textContent = `Estás ingresando al Nivel ${siguienteNivel}: ${infoNivel.tema}`;
+
+  const elItemNombre = $("premio-item-nombre");
+  if (elItemNombre) elItemNombre.textContent = `${premio.tituloPremio} (+${premio.bonoPuntos} pts)`;
+
+  const elItemDetalle = $("premio-item-detalle");
+  if (elItemDetalle) elItemDetalle.textContent = premio.regalo;
+
+  const elConsejo = $("premio-texto-consejo");
+  if (elConsejo) elConsejo.textContent = premio.consejo || "Debes revisar el manual para seguir avanzando con éxito.";
+
+  // Reproducir efectos de audio festivo
+  if (typeof AudioJuego !== "undefined") {
+    AudioJuego.fanfarria();
+    setTimeout(() => {
+      if (typeof AudioJuego.premio === "function") AudioJuego.premio();
+    }, 450);
+  }
+
+  modalPremio.classList.remove("oculto");
+  lanzarConfeti();
+
+  // Botón Revisar Manual
+  const btnManual = $("btn-premio-manual");
+  if (btnManual) {
+    btnManual.onclick = () => {
+      modalPremio.classList.add("oculto");
+      detenerConfeti();
+      abrirManual(siguienteNivel);
+    };
+  }
+
+  // Botón Continuar al siguiente nivel
+  const btnContinuar = $("btn-premio-continuar");
+  if (btnContinuar) {
+    btnContinuar.onclick = () => {
+      modalPremio.classList.add("oculto");
+      detenerConfeti();
+      if (alContinuar) alContinuar();
+    };
+  }
+}
+

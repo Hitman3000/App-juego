@@ -5,11 +5,46 @@ const CONFIG = {
   PUNTOS_ACIERTO: 15,
   PUNTOS_ERROR: 5,
   NIVELES_INFO: {
-    1: { nombre: "Nivel 1: Abstracción Formal", tema: "Proposiciones vs No Proposiciones", accion: "V (Verdadero) / F (Falso)" },
-    2: { nombre: "Nivel 2: Segmentación Estructural", tema: "Variables atómicas y negaciones", accion: "CONFIRMAR" },
-    3: { nombre: "Nivel 3: Formalización Simbólica", tema: "Traducción con 7 conectivos", accion: "FORMALIZAR" },
-    4: { nombre: "Nivel 4: Validación", tema: "Tablas de verdad y fórmulas", accion: "TAUTOLOGÍA / CONTRADICCIÓN / CONTINGENCIA" },
-    5: { nombre: "Nivel 5: Inferencia Lógica", tema: "Validez de argumentos y falacias", accion: "VÁLIDO / INVÁLIDO" }
+    1: { nombre: "Nivel 1: Proposiciones Lógicas", tema: "Proposiciones lógicas", accion: "V (Verdadero) / F (Falso)" },
+    2: { nombre: "Nivel 2: Variables y Negaciones", tema: "Variables y Negaciones", accion: "CONFIRMAR" },
+    3: { nombre: "Nivel 3: Formalización Simbólica", tema: "Formalización Simbólica", accion: "FORMALIZAR" },
+    4: { nombre: "Nivel 4: Tabla de Verdad", tema: "Tabla de verdad", accion: "TAUTOLOGÍA / CONTRADICCIÓN" },
+    5: { nombre: "Nivel 5: Inferencia Lógica", tema: "Inferencia Lógica", accion: "VÁLIDO / INVÁLIDO" }
+  }
+};
+
+const PREMIOS_NIVELES = {
+  2: {
+    insignia: "🔍",
+    tituloPremio: "Medalla de Detective de Variables",
+    bonoPuntos: 50,
+    regalo: "☕ Taza de Café del Inspector (Concentración al 100%)",
+    mensaje: "¡Excelente! Estás ingresando al Nivel 2: Variables y Negaciones.",
+    consejo: "Debes revisar el manual para seguir avanzando y dominar la identificación de cláusulas simples y negaciones."
+  },
+  3: {
+    insignia: "⚡",
+    tituloPremio: "Sello Dorado de Conectivos",
+    bonoPuntos: 75,
+    regalo: "⭐ Distintivo de Sintaxis Formal PNFI",
+    mensaje: "¡Excelente! Estás ingresando al Nivel 3: Formalización Simbólica.",
+    consejo: "Debes revisar el manual para seguir avanzando y memorizar las claves de los 7 conectivos formales."
+  },
+  4: {
+    insignia: "📊",
+    tituloPremio: "Lupa de Oro de la Verdad",
+    bonoPuntos: 100,
+    regalo: "🏆 Trofeo de Análisis Proposicional",
+    mensaje: "¡Excelente! Estás ingresando al Nivel 4: Tabla de Verdad.",
+    consejo: "Debes revisar el manual para seguir avanzando y recordar cómo clasificar Tautologías y Contradicciones."
+  },
+  5: {
+    insignia: "👑",
+    tituloPremio: "Balanza de la Sabiduría Lógica",
+    bonoPuntos: 150,
+    regalo: "🔑 Llave de Honor del Departamento de Lógica",
+    mensaje: "¡Excelente! Estás ingresando al Nivel 5: Inferencia Lógica.",
+    consejo: "Debes revisar el manual para seguir avanzando y distinguir razonamientos válidos de falacias engañosas."
   }
 };
 

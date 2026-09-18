@@ -17,14 +17,22 @@
   <!-- HUD superior compacto -->
   <header id="cabecera">
     <div class="cab-izq">
+      <!-- Botones de tipografía arriba a la izquierda (+ / -) -->
+      <div class="controles-fuente" title="Ajustar tamaño de letra">
+        <button id="btn-fuente-menos" class="btn-fuente" aria-label="Reducir tipografía" title="Reducir tamaño de letra (−)">A−</button>
+        <button id="btn-fuente-mas" class="btn-fuente" aria-label="Aumentar tipografía" title="Aumentar tamaño de letra (+)">A+</button>
+      </div>
       <span class="cab-titulo">LOGIC-PLAY</span>
-      <span id="info-dia">Nivel 1 · 0/5</span>
+      <span id="info-dia" title="Nivel activo y progreso">Nivel 1: Proposiciones Lógicas · 0/5</span>
     </div>
     <div class="cab-der">
       <span id="info-score">0 pts</span>
       <span id="info-vidas">❤️❤️❤️</span>
     </div>
   </header>
+
+  <!-- Indicador visual rápido de cambio de tipografía -->
+  <div id="toast-fuente" class="toast-fuente oculto" aria-live="polite">Tipografía: 100%</div>
 
   <main id="escena">
 
@@ -125,6 +133,37 @@
     </div>
   </div>
 
+  <!-- Modal de Felicitación y Subida de Nivel (Amigable, Divertido con Premios y Consejo del Manual) -->
+  <div id="modal-subida-nivel" class="oculto">
+    <div class="modal-caja modal-premio-caja">
+      <canvas id="confeti-canvas" class="confeti-canvas"></canvas>
+      <div class="premio-icono-wrapper">
+        <div id="premio-insignia" class="premio-insignia-anim">🎉</div>
+      </div>
+      <h2 id="premio-felicitacion-titulo">¡Excelente!</h2>
+      <div id="premio-nombre-inspector" class="premio-inspector-saludo">Inspector</div>
+      <div id="premio-nivel-nombre" class="premio-nivel-tag">Estás ingresando al Nivel 2: Variables y Negaciones</div>
+      
+      <div class="premio-caja-recompensa">
+        <div class="premio-etiqueta-recompensa">🎁 RECOMPENSA DE NIVEL DESBLOQUEADA</div>
+        <div id="premio-item-nombre" class="premio-destacado">Medalla de Detective de Variables (+50 pts)</div>
+        <div id="premio-item-detalle" class="premio-subdetalle">☕ Taza de Café del Inspector</div>
+      </div>
+
+      <div class="premio-caja-consejo">
+        <div class="consejo-icono">💡</div>
+        <div id="premio-texto-consejo" class="consejo-texto">
+          Debes revisar el manual para seguir avanzando con éxito y dominar las nuevas reglas.
+        </div>
+      </div>
+
+      <div class="premio-botones-grid">
+        <button id="btn-premio-manual" class="btn-secundario-premio" title="Consultar reglas en el manual">📖 Revisar Manual</button>
+        <button id="btn-premio-continuar" class="btn-continuar btn-premio-accion" title="Empezar a jugar este nivel">¡Aceptar y Continuar! 🚀</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MANUAL DEL INSPECTOR LÓGICO (Dossier interactivo con pestañas de los 5 niveles) -->
   <div id="modal-lista" class="oculto">
     <div class="expediente expediente-manual">
@@ -139,15 +178,15 @@
 
       <!-- Pestañas de niveles para navegar la teoría -->
       <nav class="manual-pestanas">
-        <button class="pestana-btn activa" data-nivel="1" title="Nivel 1: Abstracción"><span class="tab-txt-full">Nivel
+        <button class="pestana-btn activa" data-nivel="1" title="Nivel 1: Proposiciones Lógicas"><span class="tab-txt-full">Nivel
           </span>1</button>
-        <button class="pestana-btn" data-nivel="2" title="Nivel 2: Segmentación"><span class="tab-txt-full">Nivel
+        <button class="pestana-btn" data-nivel="2" title="Nivel 2: Variables y Negaciones"><span class="tab-txt-full">Nivel
           </span>2</button>
-        <button class="pestana-btn" data-nivel="3" title="Nivel 3: Formalización"><span class="tab-txt-full">Nivel
+        <button class="pestana-btn" data-nivel="3" title="Nivel 3: Formalización Simbólica"><span class="tab-txt-full">Nivel
           </span>3</button>
-        <button class="pestana-btn" data-nivel="4" title="Nivel 4: Validación"><span class="tab-txt-full">Nivel
+        <button class="pestana-btn" data-nivel="4" title="Nivel 4: Tabla de Verdad"><span class="tab-txt-full">Nivel
           </span>4</button>
-        <button class="pestana-btn" data-nivel="5" title="Nivel 5: Inferencia"><span class="tab-txt-full">Nivel
+        <button class="pestana-btn" data-nivel="5" title="Nivel 5: Inferencia Lógica"><span class="tab-txt-full">Nivel
           </span>5</button>
       </nav>
 
@@ -175,11 +214,11 @@
         <div class="selector-nivel-group">
           <label for="select-nivel-inicio" class="nombre-label">Comenzar en nivel:</label>
           <select id="select-nivel-inicio" class="nivel-select">
-            <option value="1">Nivel 1 — Abstracción Formal (Proposiciones vs No Proposiciones)</option>
-            <option value="2">Nivel 2 — Segmentación Estructural (Variables y Negaciones)</option>
-            <option value="3">Nivel 3 — Formalización Simbólica (7 Conectivos)</option>
-            <option value="4">Nivel 4 — Validación (Tablas de Verdad)</option>
-            <option value="5">Nivel 5 — Inferencia Lógica (Argumentos y Falacias)</option>
+            <option value="1">Nivel 1 — Proposiciones Lógicas</option>
+            <option value="2">Nivel 2 — Variables y Negaciones</option>
+            <option value="3">Nivel 3 — Formalización Simbólica</option>
+            <option value="4">Nivel 4 — Tabla de Verdad</option>
+            <option value="5">Nivel 5 — Inferencia Lógica</option>
           </select>
         </div>
       </div>

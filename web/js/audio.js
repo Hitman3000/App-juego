@@ -151,6 +151,25 @@ const AudioJuego = (() => {
     tono(1000, 0.03, "square", 0.03);
   }
 
+  function premio() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    tono(523.25, 0.1, "sine", 0.18, t);
+    tono(659.25, 0.1, "sine", 0.18, t + 0.08);
+    tono(783.99, 0.1, "sine", 0.18, t + 0.16);
+    tono(1046.50, 0.35, "sine", 0.22, t + 0.24);
+  }
+
+  function fanfarriaNivel() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    tono(440.00, 0.12, "triangle", 0.18, t);
+    tono(554.37, 0.12, "triangle", 0.18, t + 0.11);
+    tono(659.25, 0.12, "triangle", 0.18, t + 0.22);
+    tono(880.00, 0.45, "triangle", 0.25, t + 0.33);
+    tono(1108.73, 0.6, "sine", 0.20, t + 0.45);
+  }
+
   function cambiarSilencio() {
     silenciado = !silenciado;
     if (master) {
@@ -173,7 +192,9 @@ const AudioJuego = (() => {
     click: click,
     sello: click,
     moneda: acierto,
-    fanfarria: acierto,
+    fanfarria: fanfarriaNivel,
+    fanfarriaNivel: fanfarriaNivel,
+    premio: premio,
     timbre: tocarPuerta,
     cambiarSilencio: cambiarSilencio
   };

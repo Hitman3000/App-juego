@@ -4,7 +4,7 @@
 const MANUAL_TEORIA = {
   1: {
     nivel: 1,
-    titulo: "NIVEL 1 — ABSTRACCIÓN FORMAL",
+    titulo: "NIVEL 1 — PROPOSICIONES LÓGICAS",
     subtitulo: "Reconocimiento de proposiciones",
     icono: "📜",
     resumen: "Una proposición lógica es todo enunciado declarativo (afirmativo) al que se le puede asignar un único valor de verdad: Verdadero (V) o Falso (F).",
@@ -30,7 +30,7 @@ const MANUAL_TEORIA = {
 
   2: {
     nivel: 2,
-    titulo: "NIVEL 2 — SEGMENTACIÓN ESTRUCTURAL",
+    titulo: "NIVEL 2 — VARIABLES Y NEGACIONES",
     subtitulo: "Aislamiento de variables y detección de negaciones",
     icono: "🔍",
     resumen: "Una proposición simple (atómica) expresa una sola idea y no se puede subdividir. Una proposición compuesta (molecular) une dos o más cláusulas mediante conectivos lógicos.",
@@ -65,7 +65,7 @@ const MANUAL_TEORIA = {
 
   4: {
     nivel: 4,
-    titulo: "NIVEL 4 — VALIDACIÓN",
+    titulo: "NIVEL 4 — TABLA DE VERDAD",
     subtitulo: "Tablas de verdad y clasificación de fórmulas",
     icono: "📊",
     resumen: "Evalúa los valores de verdad posibles de una fórmula completa para todas sus combinaciones (2ⁿ filas) y clasifica su comportamiento.",
