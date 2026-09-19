@@ -1,3 +1,5 @@
 node_modules/ 
 serve.log 
 *.apk 
+.env
+api/.env

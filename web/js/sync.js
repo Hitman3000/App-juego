@@ -2,8 +2,13 @@
 
 const SERVER_IP = localStorage.getItem('ddd_server_ip') || '';
 
+const CURRENT_ORIGIN_API = (typeof window !== 'undefined' && window.location.origin && window.location.protocol.startsWith('http'))
+  ? `${window.location.origin}/api`
+  : null;
+
 const API_CANDIDATAS = [
   SERVER_IP ? `http://${SERVER_IP}:3000/api` : null,
+  CURRENT_ORIGIN_API,
   'http://10.0.2.2:3000/api',
   'http://localhost:3000/api'
 ].filter(Boolean);

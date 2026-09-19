@@ -1,14 +1,20 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const pool = require('./db');
 
 const app = express();
-const PORT = process.env.API_PORT || 3000;
+const PORT = process.env.PORT || process.env.API_PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Servir estáticos: Dashboard y Juego
+app.use('/dashboard', express.static(path.join(__dirname, '../dashboard')));
+app.use('/juego', express.static(path.join(__dirname, '../web')));
+app.use(express.static(path.join(__dirname, '../web')));
 
 // POST /api/partida - Guardar resultado de una partida
 app.post('/api/partida', async (req, res) => {
@@ -22,33 +28,51 @@ app.post('/api/partida', async (req, res) => {
     const nombreLimpio = nombre.trim().substring(0, 50);
 
     // Buscar o crear jugador
-    let [jugadores] = await pool.query('SELECT id FROM jugadores WHERE nombre = ?', [nombreLimpio]);
-    let jugadorId;
+    const { rows: jugadores } = await pool.query(
+      'SELECT id FROM jugadores WHERE nombre = $1',
+      [nombreLimpio]
+    );
 
+    let jugadorId;
     if (jugadores.length === 0) {
-      const [result] = await pool.query('INSERT INTO jugadores (nombre) VALUES (?)', [nombreLimpio]);
-      jugadorId = result.insertId;
+      const { rows: newJugador } = await pool.query(
+        'INSERT INTO jugadores (nombre) VALUES ($1) RETURNING id',
+        [nombreLimpio]
+      );
+      jugadorId = newJugador[0].id;
     } else {
       jugadorId = jugadores[0].id;
     }
 
     // Insertar partida
-    const [result] = await pool.query(
-      'INSERT INTO partidas (jugador_id, puntuacion, nivel_alcanzado, aciertos, fallos, tiempo_jugado, inspecciones_doc) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [jugadorId, puntuacion || 0, nivel_alcanzado || 1, aciertos || 0, fallos || 0, tiempo_jugado || 0, inspecciones_doc || 0]
+    const { rows: newPartida } = await pool.query(
+      `INSERT INTO partidas (jugador_id, puntuacion, nivel_alcanzado, aciertos, fallos, tiempo_jugado, inspecciones_doc)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id`,
+      [
+        jugadorId,
+        puntuacion || 0,
+        nivel_alcanzado || 1,
+        aciertos || 0,
+        fallos || 0,
+        tiempo_jugado || 0,
+        inspecciones_doc || 0
+      ]
     );
 
+    const partidaId = newPartida[0].id;
+
     // Obtener posición del jugador en el ranking
-    const [ranking] = await pool.query(
-      'SELECT COUNT(*) as posicion FROM jugadores j INNER JOIN partidas p ON j.id = p.jugador_id WHERE p.puntuacion > ?',
+    const { rows: ranking } = await pool.query(
+      'SELECT COUNT(*)::int as posicion FROM jugadores j INNER JOIN partidas p ON j.id = p.jugador_id WHERE p.puntuacion > $1',
       [puntuacion || 0]
     );
 
     res.json({
       ok: true,
-      partidaId: result.insertId,
+      partidaId,
       jugadorId,
-      posicion: (ranking[0].posicion || 0) + 1
+      posicion: (ranking[0]?.posicion || 0) + 1
     });
 
   } catch (err) {
@@ -60,15 +84,15 @@ app.post('/api/partida', async (req, res) => {
 // GET /api/ranking - Top 20 jugadores (mejor puntaje de cada uno)
 app.get('/api/ranking', async (req, res) => {
   try {
-    const [rows] = await pool.query(`
+    const { rows } = await pool.query(`
       SELECT 
         j.nombre,
-        MAX(p.puntuacion) as mejor_puntuacion,
-        ROUND(AVG(p.puntuacion)) as promedio_puntuacion,
-        MAX(p.nivel_alcanzado) as mejor_nivel,
-        COUNT(p.id) as total_partidas,
-        ROUND(AVG(p.aciertos) / NULLIF(AVG(p.aciertos + p.fallos), 0) * 100) as precision_pct,
-        ROUND(AVG(p.inspecciones_doc / NULLIF(p.aciertos + p.fallos, 0)), 1) as promedio_inspecciones
+        MAX(p.puntuacion)::int as mejor_puntuacion,
+        COALESCE(ROUND(AVG(p.puntuacion)::numeric)::int, 0) as promedio_puntuacion,
+        MAX(p.nivel_alcanzado)::int as mejor_nivel,
+        COUNT(p.id)::int as total_partidas,
+        COALESCE(ROUND((AVG(p.aciertos)::numeric / NULLIF(AVG(p.aciertos + p.fallos), 0) * 100)::numeric)::int, 0) as precision_pct,
+        COALESCE(ROUND(AVG(p.inspecciones_doc::numeric / NULLIF(p.aciertos + p.fallos, 0))::numeric, 1)::float, 0) as promedio_inspecciones
       FROM jugadores j
       INNER JOIN partidas p ON j.id = p.jugador_id
       GROUP BY j.id, j.nombre
@@ -89,19 +113,27 @@ app.get('/api/ranking/:nombre', async (req, res) => {
   try {
     const nombre = req.params.nombre;
 
-    const [jugador] = await pool.query('SELECT id, nombre, created_at FROM jugadores WHERE nombre = ?', [nombre]);
-    if (jugador.length === 0) {
+    const { rows: jugadores } = await pool.query(
+      'SELECT id, nombre, created_at FROM jugadores WHERE nombre = $1',
+      [nombre]
+    );
+
+    if (jugadores.length === 0) {
       return res.status(404).json({ error: 'Jugador no encontrado' });
     }
 
-    const [partidas] = await pool.query(
-      'SELECT puntuacion, nivel_alcanzado, aciertos, fallos, tiempo_jugado, inspecciones_doc, jugado_en FROM partidas WHERE jugador_id = ? ORDER BY jugado_en DESC LIMIT 20',
-      [jugador[0].id]
+    const { rows: partidas } = await pool.query(
+      `SELECT puntuacion, nivel_alcanzado, aciertos, fallos, tiempo_jugado, inspecciones_doc, jugado_en
+       FROM partidas
+       WHERE jugador_id = $1
+       ORDER BY jugado_en DESC
+       LIMIT 20`,
+      [jugadores[0].id]
     );
 
     res.json({
       ok: true,
-      jugador: jugador[0],
+      jugador: jugadores[0],
       partidas
     });
 
@@ -114,22 +146,22 @@ app.get('/api/ranking/:nombre', async (req, res) => {
 // GET /api/estadisticas - Estadísticas globales
 app.get('/api/estadisticas', async (req, res) => {
   try {
-    const [totales] = await pool.query(`
+    const { rows: totales } = await pool.query(`
       SELECT 
-        COUNT(DISTINCT j.id) as total_jugadores,
-        COUNT(p.id) as total_partidas,
-        ROUND(AVG(p.puntuacion)) as promedio_puntuacion,
-        MAX(p.puntuacion) as puntuacion_maxima,
-        ROUND(AVG(p.nivel_alcanzado), 1) as promedio_nivel,
-        ROUND(AVG(p.aciertos) / NULLIF(AVG(p.aciertos + p.fallos), 0) * 100) as precision_global,
-        ROUND(AVG(p.tiempo_jugado)) as promedio_tiempo,
-        ROUND(AVG(p.inspecciones_doc / NULLIF(p.aciertos + p.fallos, 0)), 1) as promedio_inspecciones
+        COUNT(DISTINCT j.id)::int as total_jugadores,
+        COUNT(p.id)::int as total_partidas,
+        COALESCE(ROUND(AVG(p.puntuacion)::numeric)::int, 0) as promedio_puntuacion,
+        COALESCE(MAX(p.puntuacion)::int, 0) as puntuacion_maxima,
+        COALESCE(ROUND(AVG(p.nivel_alcanzado)::numeric, 1)::float, 0) as promedio_nivel,
+        COALESCE(ROUND((AVG(p.aciertos)::numeric / NULLIF(AVG(p.aciertos + p.fallos), 0) * 100)::numeric)::int, 0) as precision_global,
+        COALESCE(ROUND(AVG(p.tiempo_jugado)::numeric)::int, 0) as promedio_tiempo,
+        COALESCE(ROUND(AVG(p.inspecciones_doc::numeric / NULLIF(p.aciertos + p.fallos, 0))::numeric, 1)::float, 0) as promedio_inspecciones
       FROM jugadores j
       INNER JOIN partidas p ON j.id = p.jugador_id
     `);
 
-    const [nivelDistribucion] = await pool.query(`
-      SELECT nivel_alcanzado, COUNT(*) as total
+    const { rows: nivelDistribucion } = await pool.query(`
+      SELECT nivel_alcanzado, COUNT(*)::int as total
       FROM partidas
       GROUP BY nivel_alcanzado
       ORDER BY nivel_alcanzado
@@ -137,7 +169,7 @@ app.get('/api/estadisticas', async (req, res) => {
 
     res.json({
       ok: true,
-      estadisticas: totales[0],
+      estadisticas: totales[0] || {},
       distribucion_niveles: nivelDistribucion
     });
 
@@ -147,11 +179,21 @@ app.get('/api/estadisticas', async (req, res) => {
   }
 });
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ ok: true, timestamp: new Date().toISOString() });
+// Health check con verificación de base de datos
+app.get('/api/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ ok: true, database: 'connected', timestamp: new Date().toISOString() });
+  } catch (err) {
+    res.status(503).json({
+      ok: false,
+      database: 'disconnected',
+      error: err.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 app.listen(PORT, () => {
-  console.log(`API D.D.D. corriendo en http://localhost:${PORT}`);
+  console.log(`API D.D.D. (PostgreSQL) corriendo en http://localhost:${PORT}`);
 });

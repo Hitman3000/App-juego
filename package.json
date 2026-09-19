@@ -9,6 +9,7 @@
     "android": "npx cap open android",
     "build:apk": "cd android && gradlew assembleDebug",
     "build:aab": "cd android && gradlew bundleRelease",
+    "start": "node api/server.js",
     "api": "cd api && node server.js",
     "dashboard": "npx http-server dashboard -p 3001",
     "dev": "concurrently \"npm run api\" \"npm run dashboard\""

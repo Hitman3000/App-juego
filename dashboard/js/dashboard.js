@@ -1,6 +1,6 @@
-/* dashboard.js — D.D.D. Control Dashboard */
-
-const API = 'http://localhost:3000/api';
+const API = (window.location.port === '3001' || window.location.port === '5500')
+  ? 'http://localhost:3000/api'
+  : `${window.location.origin}/api`;
 let rankingData = [];
 let ordenActual = 'mejor_puntuacion';
 let apiDisponible = false;
