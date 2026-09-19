@@ -11,10 +11,9 @@ const PORT = process.env.PORT || process.env.API_PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Servir estáticos: Dashboard y Juego
+// Servir estáticos: Dashboard (Panel de Control)
+app.use(express.static(path.join(__dirname, '../dashboard')));
 app.use('/dashboard', express.static(path.join(__dirname, '../dashboard')));
-app.use('/juego', express.static(path.join(__dirname, '../web')));
-app.use(express.static(path.join(__dirname, '../web')));
 
 // POST /api/partida - Guardar resultado de una partida
 app.post('/api/partida', async (req, res) => {
