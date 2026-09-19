@@ -90,7 +90,52 @@ sequenceDiagram
 
 ---
 
-## 3. Matriz Tecnológica por Capa
+## 3. Matriz Tecnológica Gráfica por Capas
+
+```mermaid
+graph TD
+    subgraph C1["🎨 CAPA 1: CLIENTE & JUEGO (Frontend)"]
+        style C1 fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+        T1["📄 HTML5 Semántico<br/><i>Estructura y semántica</i>"]
+        T2["🎨 CSS3 Puro & Variables<br/><i>Estilo retro terminal / Papers Please</i>"]
+        T3["⚡ JavaScript Vanilla (ES6+)<br/><i>Motor de inferencia y reglas lógicas</i>"]
+        T4["🔊 Web Audio API<br/><i>Efectos de sonido sintetizados</i>"]
+        T5["💾 Web Storage (localStorage)<br/><i>Persistencia y cola Offline-First</i>"]
+    end
+
+    subgraph C2["📱 CAPA 2: CONTENEDOR MÓVIL (Android)"]
+        style C2 fill:#14532d,stroke:#4ade80,stroke-width:2px,color:#fff
+        T6["📦 Capacitor 8.5<br/><i>Puente WebView a hardware nativo</i>"]
+        T7["🤖 Android SDK + Gradle<br/><i>Compilación a app-debug.apk</i>"]
+    end
+
+    subgraph C3["🚪 CAPA 3: SERVIDOR Y BACKEND (API REST)"]
+        style C3 fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#fff
+        T8["🟢 Node.js v20+<br/><i>Entorno de ejecución servidor</i>"]
+        T9["⚡ Express.js Framework<br/><i>API REST + Servidor de Dashboard</i>"]
+        T10["🛡️ CORS & Dotenv<br/><i>Seguridad y variables de entorno</i>"]
+    end
+
+    subgraph C4["📊 CAPA 4: PANEL DE CONTROL (Supervisión)"]
+        style C4 fill:#831843,stroke:#f472b6,stroke-width:2px,color:#fff
+        T11["📈 Chart.js 4<br/><i>Gráficas de precisión y niveles</i>"]
+        T12["⏱️ Reloj y Métricas en Vivo<br/><i>Monitoreo de inspectores en tiempo real</i>"]
+    end
+
+    subgraph C5["🐘 CAPA 5: NUBE & PERSISTENCIA (Database & Hosting)"]
+        style C5 fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#fff
+        T13["🐘 PostgreSQL 15 (Supabase)<br/><i>Relacional con integridad foránea</i>"]
+        T14["🔌 Driver pg.Pool<br/><i>Conexiones concurrentes con SSL</i>"]
+        T15["☁️ Render.com<br/><i>Web Service con despliegue CI/CD</i>"]
+    end
+
+    C1 -->|Empaquetado con| C2
+    C2 -->|Envío de partidas vía HTTPS| C3
+    C3 -->|Sirve y alimenta datos a| C4
+    C3 -->|Lee y escribe vía SSL a| C5
+```
+
+### Tabla Resumen de Tecnologías
 
 | Capa / Componente | Tecnología | Rol y Propósito |
 | :--- | :--- | :--- |

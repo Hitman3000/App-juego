@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logic-Play UPTT — Arquitectura del Sistema y Flujo Gráfico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(18, 26, 44, 0.7);
+      --bg-card-hover: rgba(28, 40, 68, 0.85);
+      --border-color: rgba(56, 189, 248, 0.18);
+      --border-glow: rgba(56, 189, 248, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-purple: #c084fc;
+      --accent-pink: #f472b6;
+      --accent-blue: #60a5fa;
+      --accent-amber: #fbbf24;
+      --shadow-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(192, 132, 252, 0.08) 0%, transparent 45%);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 30px 20px 60px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 30px 20px;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .badge-hero {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 30px;
+      color: var(--accent-cyan);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 30%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 35px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      border-color: var(--border-glow);
+      transform: translateY(-2px);
+    }
+
+    .tab-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Tab Contents */
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Diagram Containers */
+    .diagram-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: var(--shadow-glow);
+      margin-bottom: 30px;
+      overflow-x: auto;
+    }
+
+    .diagram-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .diagram-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 25px;
+    }
+
+    .mermaid {
+      background: rgba(10, 15, 28, 0.85);
+      padding: 25px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Technology Grid Cards */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-top: 25px;
+    }
+
+    .tech-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tech-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .tech-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .tech-card.layer-client::before { background: var(--accent-cyan); }
+    .tech-card.layer-mobile::before { background: var(--accent-green); }
+    .tech-card.layer-backend::before { background: var(--accent-purple); }
+    .tech-card.layer-dashboard::before { background: var(--accent-pink); }
+    .tech-card.layer-database::before { background: var(--accent-blue); }
+
+    .tech-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .tech-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .tech-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-cyan { background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); }
+    .badge-green { background: rgba(74, 222, 128, 0.15); color: var(--accent-green); }
+    .badge-purple { background: rgba(192, 132, 252, 0.15); color: var(--accent-purple); }
+    .badge-pink { background: rgba(244, 114, 182, 0.15); color: var(--accent-pink); }
+    .badge-blue { background: rgba(96, 165, 250, 0.15); color: var(--accent-blue); }
+
+    .tech-tech {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--accent-amber);
+      margin-bottom: 10px;
+    }
+
+    .tech-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Database Schema Table */
+    .db-section {
+      margin-top: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: rgba(10, 15, 28, 0.6);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 14px 18px;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-cyan);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    td code {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-green);
+      background: rgba(74, 222, 128, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="badge-hero">Documentación Técnica Visual</div>
+      <h1>Logic-Play UPTT (D.D.D.)</h1>
+      <p class="subtitle">Arquitectura de Software, Diagramas de Flujo Gráficos y Matriz de Tecnologías del Ecosistema de Inspección Lógica Proposicional.</p>
+    </header>
+
+    <!-- Nav Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-arq')">🌐 1. Arquitectura Global</button>
+      <button class="tab-btn" onclick="switchTab('tab-flujo')">⚡ 2. Flujo Offline-First</button>
+      <button class="tab-btn" onclick="switchTab('tab-stack')">🧱 3. Stack Tecnológico Gráfico</button>
+      <button class="tab-btn" onclick="switchTab('tab-db')">🐘 4. Modelo de Datos</button>
+    </nav>
+
+    <!-- TAB 1: Arquitectura Global -->
+    <div id="tab-arq" class="tab-content active">
+      <div class="diagram-card">
+        <h2 class="diagram-title">🌐 Topología Global del Sistema</h2>
+        <p class="diagram-desc">Visualización de la interacción entre el cliente Android, el contenedor unificado en Render y la base de datos distribuida en Supabase.</p>
+        <div class="mermaid">
+flowchart TB
+    subgraph CLIENTE_MOVIL["📱 DISPOSITIVO MÓVIL (Android APK)"]
+        A1["🎮 Juego Logic-Play<br/><i>HTML5 / CSS3 / JS Vanilla</i>"]
+        A2["💾 SyncManager & Offline Queue<br/><i>localStorage (Cola de Respaldo)</i>"]
+        A3["📦 Capacitor Runtime<br/><i>Android WebView Container</i>"]
+        A1 --> A2
+        A2 --> A3
+    end
+
+    subgraph CLOUD_RENDER["☁️ SERVICIO EN LA NUBE (Render.com)"]
+        subgraph PUERTO_UNIFICADO["🌐 Servidor Unificado (Puerto $PORT)"]
+            B1["🚪 Express.js Server<br/><i>Node.js Backend</i>"]
+            B2["📊 Panel de Control (Dashboard)<br/><i>HTML / CSS / JS / Chart.js</i>"]
+            B3["🔌 API REST Endpoints<br/><i>/api/partida, /api/ranking, /api/estadisticas</i>"]
+            B1 --> B2
+            B1 --> B3
+        end
+    end
+
+    subgraph BD_SUPABASE["🐘 BASE DE DATOS (Supabase Cloud)"]
+        C1["PostgreSQL 15 (AWS us-east-1)"]
+        subgraph TABLAS["Tablas & Índices"]
+            T1[("jugadores")]
+            T2[("partidas")]
+            I1["Índices: puntuación, fecha, jugador_id"]
+        end
+        C1 --- T1
+        C1 --- T2
+        C1 --- I1
+    end
+
+    A3 -- "HTTP/HTTPS (POST /api/partida)" --> B3
+    B3 -- "Conexión Segura SSL (Driver pg.Pool)" --> C1
+    B2 -- "Consulta periódica (GET /api/estadisticas)" --> B3
+    ADMIN["👨‍💼 Docente / Administrador<br/>(Navegador Web)"] --> B2
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Flujo Offline-First -->
+    <div id="tab-flujo" class="tab-content">
+      <div class="diagram-card">
+        <h2 class="diagram-title">⚡ Ciclo de Vida de Partida y Sincronización</h2>
+        <p class="diagram-desc">Diagrama de secuencia que demuestra cómo el juego procesa y resguarda las partidas tanto en línea como en modo sin conexión.</p>
+        <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Jugador as 📱 Inspector (APK)
+    participant Sync as 💾 SyncManager (Local)
+    participant API as 🚪 API Express (Render)
+    participant DB as 🐘 PostgreSQL (Supabase)
+    participant Dash as 📊 Dashboard Web
+
+    Jugador->>Sync: Termina partida (Puntaje, nivel, aciertos, fallos, tiempo)
+    
+    alt ¿Hay Conexión a Internet?
+        Sync->>API: POST /api/partida {nombre, puntuacion...}
+        API->>DB: INSERT INTO jugadores ON CONFLICT / SELECT
+        API->>DB: INSERT INTO partidas ... RETURNING id
+        API->>DB: SELECT COUNT(*) (Calcular posición ranking)
+        DB-->>API: Datos guardados + Posición calculada
+        API-->>Sync: 200 OK {partidaId, posicion}
+        Sync-->>Jugador: Muestra feedback y posición en el ranking
+    else Modo Offline (Sin Conexión)
+        Sync->>Sync: Guarda en cola local (localStorage: 'ddd_cola_sync')
+        Sync-->>Jugador: Notifica partida guardada localmente
+        Note over Jugador,Sync: Cuando se recupera la conexión a Internet...
+        Sync->>API: Envía partidas pendientes en cola automáticamente
+        API->>DB: Guarda partidas pendientes
+    end
+
+    Note over Dash,DB: Monitoreo en vivo desde el navegador:
+    Dash->>API: GET /api/ranking & GET /api/estadisticas
+    API->>DB: Agregaciones (AVG puntaje, AVG precisión, distribución)
+    DB-->>API: Estadísticas globales
+    API-->>Dash: Datos JSON
+    Dash->>Dash: Actualiza gráficas y podio de inspectores
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Stack Tecnológico Gráfico -->
+    <div id="tab-stack" class="tab-content">
+      <div class="diagram-card">
+        <h2 class="diagram-title">🧱 Pila Tecnológica por Capas</h2>
+        <p class="diagram-desc">Estructura jerárquica de las herramientas y frameworks que componen el sistema completo.</p>
+        <div class="mermaid">
+graph TD
+    subgraph C1["🎨 CAPA 1: CLIENTE & JUEGO (Frontend)"]
+        style C1 fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+        T1["📄 HTML5 Semántico<br/><i>Estructura y semántica</i>"]
+        T2["🎨 CSS3 Puro & Variables<br/><i>Estilo retro terminal / Papers Please</i>"]
+        T3["⚡ JavaScript Vanilla (ES6+)<br/><i>Motor de inferencia y reglas lógicas</i>"]
+        T4["🔊 Web Audio API<br/><i>Efectos de sonido sintetizados</i>"]
+        T5["💾 Web Storage (localStorage)<br/><i>Persistencia y cola Offline-First</i>"]
+    end
+
+    subgraph C2["📱 CAPA 2: CONTENEDOR MÓVIL (Android)"]
+        style C2 fill:#14532d,stroke:#4ade80,stroke-width:2px,color:#fff
+        T6["📦 Capacitor 8.5<br/><i>Puente WebView a hardware nativo</i>"]
+        T7["🤖 Android SDK + Gradle<br/><i>Compilación a app-debug.apk</i>"]
+    end
+
+    subgraph C3["🚪 CAPA 3: SERVIDOR Y BACKEND (API REST)"]
+        style C3 fill:#4c1d95,stroke:#c084fc,stroke-width:2px,color:#fff
+        T8["🟢 Node.js v20+<br/><i>Entorno de ejecución servidor</i>"]
+        T9["⚡ Express.js Framework<br/><i>API REST + Servidor de Dashboard</i>"]
+        T10["🛡️ CORS & Dotenv<br/><i>Seguridad y variables de entorno</i>"]
+    end
+
+    subgraph C4["📊 CAPA 4: PANEL DE CONTROL (Supervisión)"]
+        style C4 fill:#831843,stroke:#f472b6,stroke-width:2px,color:#fff
+        T11["📈 Chart.js 4<br/><i>Gráficas de precisión y niveles</i>"]
+        T12["⏱️ Reloj y Métricas en Vivo<br/><i>Monitoreo de inspectores en tiempo real</i>"]
+    end
+
+    subgraph C5["🐘 CAPA 5: NUBE & PERSISTENCIA (Database & Hosting)"]
+        style C5 fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#fff
+        T13["🐘 PostgreSQL 15 (Supabase)<br/><i>Relacional con integridad foránea</i>"]
+        T14["🔌 Driver pg.Pool<br/><i>Conexiones concurrentes con SSL</i>"]
+        T15["☁️ Render.com<br/><i>Web Service con despliegue CI/CD</i>"]
+    end
+
+    C1 -->|Empaquetado con| C2
+    C2 -->|Envío de partidas vía HTTPS| C3
+    C3 -->|Sirve y alimenta datos a| C4
+    C3 -->|Lee y escribe vía SSL a| C5
+        </div>
+      </div>
+
+      <!-- Tarjetas detalladas de cada tecnología -->
+      <div class="tech-grid">
+        <div class="tech-card layer-client">
+          <div class="tech-header">
+            <h3 class="tech-title">Núcleo del Juego</h3>
+            <span class="tech-badge badge-cyan">Frontend</span>
+          </div>
+          <div class="tech-tech">HTML5 Semántico + CSS3 Puro</div>
+          <p class="tech-desc">Interfaz visual inspirada en terminales de admisión retro (*Papers, Please*). Diseñado sin frameworks pesados para un rendimiento de 60fps en cualquier móvil.</p>
+        </div>
+
+        <div class="tech-card layer-client">
+          <div class="tech-header">
+            <h3 class="tech-title">Motor Lógico</h3>
+            <span class="tech-badge badge-cyan">Lógica</span>
+          </div>
+          <div class="tech-tech">JavaScript Vanilla (ES6+)</div>
+          <p class="tech-desc">Algoritmos de generación procedural de enunciados proposicionales, resolución de tablas de verdad, inferencias modus ponens/tollens y feedback pedagógico inmediato.</p>
+        </div>
+
+        <div class="tech-card layer-mobile">
+          <div class="tech-header">
+            <h3 class="tech-title">Contenedor Nativo</h3>
+            <span class="tech-badge badge-green">Móvil</span>
+          </div>
+          <div class="tech-tech">Capacitor 8.5 + Gradle</div>
+          <p class="tech-desc">Empaqueta la web local en una aplicación autónoma de Android instalable (`app-debug.apk`), puenteando eventos de ciclo de vida del dispositivo móvil.</p>
+        </div>
+
+        <div class="tech-card layer-mobile">
+          <div class="tech-header">
+            <h3 class="tech-title">Sincronización Offline</h3>
+            <span class="tech-badge badge-green">Resiliencia</span>
+          </div>
+          <div class="tech-tech">LocalStorage (Web Storage API)</div>
+          <p class="tech-desc">Genera un UUID persistente para cada inspector y mantiene una cola local de partidas en caso de pérdida de señal, subiéndolas al reconectar.</p>
+        </div>
+
+        <div class="tech-card layer-backend">
+          <div class="tech-header">
+            <h3 class="tech-title">Servidor Unificado</h3>
+            <span class="tech-badge badge-purple">Backend</span>
+          </div>
+          <div class="tech-tech">Node.js + Express.js</div>
+          <p class="tech-desc">Servidor de alto rendimiento que centraliza la API REST y sirve los archivos estáticos del panel de control bajo un solo puerto para Render.</p>
+        </div>
+
+        <div class="tech-card layer-database">
+          <div class="tech-header">
+            <h3 class="tech-title">Base de Datos Cloud</h3>
+            <span class="tech-badge badge-blue">Persistencia</span>
+          </div>
+          <div class="tech-tech">PostgreSQL 15 (Supabase Cloud)</div>
+          <p class="tech-desc">Instancia administrada en AWS con integridad referencial, índices de aceleración para rankings y claves foráneas en cascada con SSL obligatorio.</p>
+        </div>
+
+        <div class="tech-card layer-dashboard">
+          <div class="tech-header">
+            <h3 class="tech-title">Panel de Supervisión</h3>
+            <span class="tech-badge badge-pink">Analytics</span>
+          </div>
+          <div class="tech-tech">Chart.js + Glassmorphism</div>
+          <p class="tech-desc">Dashboard interactivo para que docentes y supervisores monitoreen en vivo los promedios de puntaje, precisión global y podio de inspectores.</p>
+        </div>
+
+        <div class="tech-card layer-database">
+          <div class="tech-header">
+            <h3 class="tech-title">Infraestructura Nube</h3>
+            <span class="tech-badge badge-blue">Despliegue</span>
+          </div>
+          <div class="tech-tech">Render.com Web Service</div>
+          <p class="tech-desc">Hospedaje continuo integrado con GitHub, asignación dinámica de puertos y certificados SSL automáticos sin costo.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Modelo de Datos -->
+    <div id="tab-db" class="tab-content">
+      <div class="diagram-card">
+        <h2 class="diagram-title">🐘 Modelo Entidad-Relación (PostgreSQL)</h2>
+        <p class="diagram-desc">Estructura de las tablas y campos activos en el cluster de Supabase.</p>
+        <div class="mermaid">
+erDiagram
+    JUGADORES ||--o{ PARTIDAS : "registra (1 a N)"
+    
+    JUGADORES {
+        serial id PK "Identificador único del inspector"
+        varchar nombre "Nombre de usuario único (max 50)"
+        timestamptz created_at "Fecha y hora de registro"
+    }
+
+    PARTIDAS {
+        serial id PK "Identificador único de partida"
+        int jugador_id FK "Referencia a jugadores.id (CASCADE)"
+        int puntuacion "Puntos totales obtenidos"
+        int nivel_alcanzado "Nivel máximo de inspección"
+        int aciertos "Decisiones correctas tomadas"
+        int fallos "Errores cometidos"
+        int tiempo_jugado "Duración en segundos"
+        int inspecciones_doc "Consultas al manual lógico"
+        timestamptz jugado_en "Marca de tiempo de la partida"
+    }
+        </div>
+
+        <div class="db-section">
+          <h3 style="color: var(--text-main); margin-top: 25px; margin-bottom: 10px;">Índices de Optimización en Supabase</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre del Índice</th>
+                <th>Tabla Afectada</th>
+                <th>Columna / Criterio</th>
+                <th>Objetivo de Rendimiento</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>idx_jugadores_nombre</code></td>
+                <td><code>jugadores</code></td>
+                <td><code>nombre</code></td>
+                <td>Búsqueda instantánea durante el inicio de sesión del jugador.</td>
+              </tr>
+              <tr>
+                <td><code>idx_partidas_puntuacion</code></td>
+                <td><code>partidas</code></td>
+                <td><code>puntuacion DESC</code></td>
+                <td>Aceleración del cálculo del ranking top 20 en milisegundos.</td>
+              </tr>
+              <tr>
+                <td><code>idx_partidas_jugador_id</code></td>
+                <td><code>partidas</code></td>
+                <td><code>jugador_id</code></td>
+                <td>Filtrado rápido del historial individual de cada inspector.</td>
+              </tr>
+              <tr>
+                <td><code>idx_partidas_jugado_en</code></td>
+                <td><code>partidas</code></td>
+                <td><code>jugado_en DESC</code></td>
+                <td>Agrupaciones y estadísticas temporales para el Dashboard.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      Logic-Play UPTT — Sistema de Gamificación Educativa en Lógica Proposicional. Desarrollado con Node.js, Express, PostgreSQL y Capacitor.
+    </footer>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#0a0f1c',
+        primaryColor: '#1e293b',
+        primaryBorderColor: '#38bdf8',
+        primaryTextColor: '#f1f5f9',
+        lineColor: '#38bdf8',
+        secondaryColor: '#14532d',
+        tertiaryColor: '#4c1d95'
+      },
+      fontFamily: 'Inter, sans-serif'
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      const target = document.getElementById(tabId);
+      target.classList.add('active');
+
+      // Forzar render de mermaid al mostrar tab oculta
+      setTimeout(() => {
+        mermaid.contentLoaded();
+      }, 50);
+    }
+  </script>
+</body>
+</html>
