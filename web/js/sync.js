@@ -2,11 +2,14 @@
 
 const SERVER_IP = localStorage.getItem('ddd_server_ip') || '';
 
+const RENDER_API = 'https://app-juego-fflq.onrender.com/api';
+
 const CURRENT_ORIGIN_API = (typeof window !== 'undefined' && window.location.origin && window.location.protocol.startsWith('http'))
   ? `${window.location.origin}/api`
   : null;
 
 const API_CANDIDATAS = [
+  RENDER_API,
   SERVER_IP ? `http://${SERVER_IP}:3000/api` : null,
   CURRENT_ORIGIN_API,
   'http://10.0.2.2:3000/api',
@@ -19,7 +22,7 @@ let apiDetectada = false;
 async function detectarAPI() {
   for (const base of API_CANDIDATAS) {
     try {
-      const resp = await fetch(`${base}/health`, { signal: AbortSignal.timeout(3000) });
+      const resp = await fetch(`${base}/health`, { signal: AbortSignal.timeout(6000) });
       if (resp.ok) {
         API_URL = base;
         apiDetectada = true;

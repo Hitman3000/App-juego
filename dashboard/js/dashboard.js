@@ -1,6 +1,10 @@
-const API = (window.location.port === '3001' || window.location.port === '5500')
-  ? 'http://localhost:3000/api'
-  : `${window.location.origin}/api`;
+const RENDER_API = 'https://app-juego-fflq.onrender.com/api';
+
+const API = (window.location.origin && window.location.origin.includes('onrender.com'))
+  ? `${window.location.origin}/api`
+  : (window.location.port === '3000')
+    ? `${window.location.origin}/api`
+    : RENDER_API;
 let rankingData = [];
 let ordenActual = 'mejor_puntuacion';
 let apiDisponible = false;

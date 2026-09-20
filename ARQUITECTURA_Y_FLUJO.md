@@ -147,7 +147,7 @@ graph TD
 | **Base de Datos** | **PostgreSQL (Supabase Cloud)** | Base de datos relacional en la nube (AWS), con soporte de integridad referencial, claves foráneas en cascada e índices optimizados. |
 | **Driver de Conexión** | **`pg` (node-postgres Pool)** | Manejo eficiente de conexiones concurrentes (`Pool`) con encriptación SSL forzada para servicios cloud. |
 | **Panel Administrativo** | **Chart.js + Glassmorphism CSS** | Dashboard web para docentes con gráficas de precisión, distribución de niveles, métricas globales y reloj en tiempo real. |
-| **Hosting & Despliegue** | **Render.com** | Plataforma de alojamiento en la nube con despliegue continuo integrado a GitHub. |
+| **Hosting & Despliegue** | **Render.com** | Plataforma cloud con despliegue continuo. API en producción: `https://app-juego-fflq.onrender.com/api` |
 
 ---
 
