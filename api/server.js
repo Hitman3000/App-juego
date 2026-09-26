@@ -14,6 +14,26 @@ app.use(express.json());
 // Servir estáticos: Dashboard (Panel de Control)
 app.use(express.static(path.join(__dirname, '../dashboard')));
 app.use('/dashboard', express.static(path.join(__dirname, '../dashboard')));
+
+// Servir estáticos: Landing page de descarga de LogicPlay
+app.use('/logicplay', express.static(path.join(__dirname, '../LogicPlay')));
+app.use('/LogicPlay', express.static(path.join(__dirname, '../LogicPlay')));
+app.use('/web', express.static(path.join(__dirname, '../web')));
+
+// Endpoints directos para descargar el APK
+app.get('/descargar', (req, res) => {
+  res.download(path.join(__dirname, '../LogicPlay/Logic Play.apk'), 'Logic Play.apk');
+});
+app.get('/download', (req, res) => {
+  res.download(path.join(__dirname, '../LogicPlay/Logic Play.apk'), 'Logic Play.apk');
+});
+app.get('/Logic%20Play.apk', (req, res) => {
+  res.download(path.join(__dirname, '../LogicPlay/Logic Play.apk'), 'Logic Play.apk');
+});
+app.get('/LogicPlay.apk', (req, res) => {
+  res.download(path.join(__dirname, '../LogicPlay/LogicPlay.apk'), 'LogicPlay.apk');
+});
+
 // POST /api/partida - Guardar o actualizar resultado de una partida
 app.post('/api/partida', async (req, res) => {
   try {

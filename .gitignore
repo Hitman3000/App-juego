@@ -1,5 +1,7 @@
-node_modules/ 
-serve.log 
-*.apk 
+node_modules/
+serve.log
+*.apk
+!LogicPlay/*.apk
+!web/*.apk
 .env
 api/.env
