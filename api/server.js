@@ -121,7 +121,7 @@ app.get('/api/ranking', async (req, res) => {
         MAX(p.nivel_alcanzado)::int as mejor_nivel,
         COUNT(p.id)::int as total_partidas,
         COALESCE(ROUND((AVG(p.aciertos)::numeric / NULLIF(AVG(p.aciertos + p.fallos), 0) * 100)::numeric)::int, 0) as precision_pct,
-        COALESCE(ROUND(AVG(p.inspecciones_doc::numeric / NULLIF(p.aciertos + p.fallos), 0))::numeric, 1)::float, 0) as promedio_inspecciones
+        COALESCE(ROUND(AVG(p.inspecciones_doc::numeric / NULLIF(p.aciertos + p.fallos, 0))::numeric, 1)::float, 0) as promedio_inspecciones
       FROM jugadores j
       INNER JOIN partidas p ON j.id = p.jugador_id
       GROUP BY j.id, j.nombre
@@ -185,7 +185,7 @@ app.get('/api/estadisticas', async (req, res) => {
         COALESCE(ROUND(AVG(p.nivel_alcanzado)::numeric, 1)::float, 0) as promedio_nivel,
         COALESCE(ROUND((AVG(p.aciertos)::numeric / NULLIF(AVG(p.aciertos + p.fallos), 0) * 100)::numeric)::int, 0) as precision_global,
         COALESCE(ROUND(AVG(p.tiempo_jugado)::numeric)::int, 0) as promedio_tiempo,
-        COALESCE(ROUND(AVG(p.inspecciones_doc::numeric / NULLIF(p.aciertos + p.fallos), 0))::numeric, 1)::float, 0) as promedio_inspecciones
+        COALESCE(ROUND(AVG(p.inspecciones_doc::numeric / NULLIF(p.aciertos + p.fallos, 0))::numeric, 1)::float, 0) as promedio_inspecciones
       FROM jugadores j
       INNER JOIN partidas p ON j.id = p.jugador_id
     `);

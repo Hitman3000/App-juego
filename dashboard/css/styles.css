@@ -1,11 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
 
 @font-face {
   font-family: 'VT323';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('../web/fonts/VT323.ttf') format('truetype');
+  src: url('../fonts/VT323.ttf') format('truetype'),
+       url('fonts/VT323.ttf') format('truetype');
 }
 
 @font-face {
@@ -13,7 +14,8 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('../web/fonts/ShareTechMono.woff2') format('woff2');
+  src: url('../fonts/ShareTechMono.woff2') format('woff2'),
+       url('fonts/ShareTechMono.woff2') format('woff2');
 }
 
 /* ============================================================
