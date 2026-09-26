@@ -15,11 +15,13 @@ CREATE TABLE IF NOT EXISTS partidas (
     fallos INTEGER NOT NULL DEFAULT 0,
     tiempo_jugado INTEGER NOT NULL DEFAULT 0,
     inspecciones_doc INTEGER NOT NULL DEFAULT 0,
+    sesion_id VARCHAR(64),
     jugado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Índices para optimizar rankings y consultas de historial
 CREATE INDEX IF NOT EXISTS idx_jugadores_nombre ON jugadores(nombre);
 CREATE INDEX IF NOT EXISTS idx_partidas_jugador_id ON partidas(jugador_id);
+CREATE INDEX IF NOT EXISTS idx_partidas_sesion_id ON partidas(sesion_id);
 CREATE INDEX IF NOT EXISTS idx_partidas_puntuacion ON partidas(puntuacion DESC);
 CREATE INDEX IF NOT EXISTS idx_partidas_jugado_en ON partidas(jugado_en DESC);

@@ -417,17 +417,34 @@ function ocultarModal() {
 
 /* ── Modal de Inicio de Turno ──────────────────────────────── */
 
-function mostrarInicio(alComenzar) {
+function actualizarHudInspector(nombre) {
+  const el = $("nombre-inspector-hud");
+  if (el) {
+    el.textContent = (nombre && nombre.trim()) ? nombre.trim() : "Inspector";
+  }
+}
+
+function mostrarInicio(alComenzar, forzarModal = false) {
   const inicio      = $("modal-inicio");
   const inputNombre = $("input-nombre");
   const selectNivel = $("select-nivel-inicio");
 
-  // Precarga el nombre si el jugador ya había jugado antes
-  const nombreGuardado = SyncManager.obtenerNombre();
-  if (nombreGuardado && inputNombre) {
-    inputNombre.value = nombreGuardado;
+  const nombreGuardado = (typeof SyncManager !== "undefined") ? SyncManager.obtenerNombre() : "";
+  if (nombreGuardado) {
+    actualizarHudInspector(nombreGuardado);
+    if (inputNombre) inputNombre.value = nombreGuardado;
   }
 
+  // Si YA tiene nombre guardado y NO se forzó abrir el modal de cambio, iniciar directamente:
+  if (nombreGuardado && !forzarModal) {
+    const nivelGuardado = parseInt(localStorage.getItem('ddd_nivel_actual')) || 1;
+    if (selectNivel) selectNivel.value = nivelGuardado;
+    inicio.classList.add("oculto");
+    if (alComenzar) alComenzar(nivelGuardado);
+    return;
+  }
+
+  // Si NO tiene nombre (primera vez) o si se pulsó para cambiar de inspector:
   inicio.classList.remove("oculto");
 
   $("btn-comenzar").onclick = () => {
@@ -440,10 +457,14 @@ function mostrarInicio(alComenzar) {
       return;
     }
 
-    // Persiste el nombre (y genera el UUID si no existe todavía)
-    SyncManager.guardarNombre(nombre);
+    // Persiste el nombre
+    if (typeof SyncManager !== "undefined") {
+      SyncManager.guardarNombre(nombre);
+    }
+    actualizarHudInspector(nombre);
 
     const nivelElegido = selectNivel ? parseInt(selectNivel.value) || 1 : 1;
+    localStorage.setItem('ddd_nivel_actual', nivelElegido);
     inicio.classList.add("oculto");
 
     if (typeof AudioJuego !== "undefined") {
@@ -451,7 +472,7 @@ function mostrarInicio(alComenzar) {
       AudioJuego.timbre();
     }
 
-    alComenzar(nivelElegido);
+    if (alComenzar) alComenzar(nivelElegido);
   };
 }
 
@@ -461,6 +482,17 @@ $("btn-cerrar-dni").onclick = toggleDni;
 $("dni-mesa").onclick = toggleDni;
 $("hit-papeles").onclick = () => abrirManual(typeof estado !== "undefined" ? estado.dia : 1);
 $("btn-cerrar-lista").onclick = cerrarManual;
+
+const btnInspectorHud = $("btn-inspector-hud");
+if (btnInspectorHud) {
+  btnInspectorHud.onclick = () => {
+    mostrarInicio((nivel) => {
+      if (typeof comenzarNivel === "function") {
+        comenzarNivel(nivel);
+      }
+    }, true);
+  };
+}
 
 $("modal-lista").addEventListener("click", (e) => {
   if (e.target.id === "modal-lista") cerrarManual();

@@ -14,11 +14,10 @@ app.use(express.json());
 // Servir estáticos: Dashboard (Panel de Control)
 app.use(express.static(path.join(__dirname, '../dashboard')));
 app.use('/dashboard', express.static(path.join(__dirname, '../dashboard')));
-
-// POST /api/partida - Guardar resultado de una partida
+// POST /api/partida - Guardar o actualizar resultado de una partida
 app.post('/api/partida', async (req, res) => {
   try {
-    const { nombre, puntuacion, nivel_alcanzado, aciertos, fallos, tiempo_jugado, inspecciones_doc } = req.body;
+    const { nombre, puntuacion, nivel_alcanzado, aciertos, fallos, tiempo_jugado, inspecciones_doc, sesion_id } = req.body;
 
     if (!nombre || nombre.trim().length === 0) {
       return res.status(400).json({ error: 'Nombre requerido' });
@@ -43,23 +42,53 @@ app.post('/api/partida', async (req, res) => {
       jugadorId = jugadores[0].id;
     }
 
-    // Insertar partida
-    const { rows: newPartida } = await pool.query(
-      `INSERT INTO partidas (jugador_id, puntuacion, nivel_alcanzado, aciertos, fallos, tiempo_jugado, inspecciones_doc)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id`,
-      [
-        jugadorId,
-        puntuacion || 0,
-        nivel_alcanzado || 1,
-        aciertos || 0,
-        fallos || 0,
-        tiempo_jugado || 0,
-        inspecciones_doc || 0
-      ]
-    );
+    let partidaId = null;
 
-    const partidaId = newPartida[0].id;
+    // Si viene sesion_id, verificar si ya existe esa partida en curso para actualizarla
+    if (sesion_id) {
+      const { rows: partidaExistente } = await pool.query(
+        'SELECT id FROM partidas WHERE sesion_id = $1 AND jugador_id = $2',
+        [sesion_id, jugadorId]
+      );
+
+      if (partidaExistente.length > 0) {
+        partidaId = partidaExistente[0].id;
+        await pool.query(
+          `UPDATE partidas 
+           SET puntuacion = $1, nivel_alcanzado = $2, aciertos = $3, fallos = $4, tiempo_jugado = $5, inspecciones_doc = $6, jugado_en = CURRENT_TIMESTAMP
+           WHERE id = $7`,
+          [
+            puntuacion || 0,
+            nivel_alcanzado || 1,
+            aciertos || 0,
+            fallos || 0,
+            tiempo_jugado || 0,
+            inspecciones_doc || 0,
+            partidaId
+          ]
+        );
+      }
+    }
+
+    // Si no existía previa con sesion_id, insertar nueva partida
+    if (!partidaId) {
+      const { rows: newPartida } = await pool.query(
+        `INSERT INTO partidas (jugador_id, puntuacion, nivel_alcanzado, aciertos, fallos, tiempo_jugado, inspecciones_doc, sesion_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING id`,
+        [
+          jugadorId,
+          puntuacion || 0,
+          nivel_alcanzado || 1,
+          aciertos || 0,
+          fallos || 0,
+          tiempo_jugado || 0,
+          inspecciones_doc || 0,
+          sesion_id || null
+        ]
+      );
+      partidaId = newPartida[0].id;
+    }
 
     // Obtener posición del jugador en el ranking
     const { rows: ranking } = await pool.query(
@@ -80,22 +109,23 @@ app.post('/api/partida', async (req, res) => {
   }
 });
 
-// GET /api/ranking - Top 20 jugadores (mejor puntaje de cada uno)
+// GET /api/ranking - Top 20 jugadores (con total acumulado y mejor puntaje)
 app.get('/api/ranking', async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT 
         j.nombre,
         MAX(p.puntuacion)::int as mejor_puntuacion,
+        COALESCE(SUM(p.puntuacion)::numeric::int, 0) as total_puntos,
         COALESCE(ROUND(AVG(p.puntuacion)::numeric)::int, 0) as promedio_puntuacion,
         MAX(p.nivel_alcanzado)::int as mejor_nivel,
         COUNT(p.id)::int as total_partidas,
         COALESCE(ROUND((AVG(p.aciertos)::numeric / NULLIF(AVG(p.aciertos + p.fallos), 0) * 100)::numeric)::int, 0) as precision_pct,
-        COALESCE(ROUND(AVG(p.inspecciones_doc::numeric / NULLIF(p.aciertos + p.fallos, 0))::numeric, 1)::float, 0) as promedio_inspecciones
+        COALESCE(ROUND(AVG(p.inspecciones_doc::numeric / NULLIF(p.aciertos + p.fallos), 0))::numeric, 1)::float, 0) as promedio_inspecciones
       FROM jugadores j
       INNER JOIN partidas p ON j.id = p.jugador_id
       GROUP BY j.id, j.nombre
-      ORDER BY mejor_puntuacion DESC
+      ORDER BY total_puntos DESC, mejor_puntuacion DESC
       LIMIT 20
     `);
 
@@ -149,12 +179,13 @@ app.get('/api/estadisticas', async (req, res) => {
       SELECT 
         COUNT(DISTINCT j.id)::int as total_jugadores,
         COUNT(p.id)::int as total_partidas,
+        COALESCE(SUM(p.puntuacion)::numeric::int, 0) as total_puntos_global,
         COALESCE(ROUND(AVG(p.puntuacion)::numeric)::int, 0) as promedio_puntuacion,
         COALESCE(MAX(p.puntuacion)::int, 0) as puntuacion_maxima,
         COALESCE(ROUND(AVG(p.nivel_alcanzado)::numeric, 1)::float, 0) as promedio_nivel,
         COALESCE(ROUND((AVG(p.aciertos)::numeric / NULLIF(AVG(p.aciertos + p.fallos), 0) * 100)::numeric)::int, 0) as precision_global,
         COALESCE(ROUND(AVG(p.tiempo_jugado)::numeric)::int, 0) as promedio_tiempo,
-        COALESCE(ROUND(AVG(p.inspecciones_doc::numeric / NULLIF(p.aciertos + p.fallos, 0))::numeric, 1)::float, 0) as promedio_inspecciones
+        COALESCE(ROUND(AVG(p.inspecciones_doc::numeric / NULLIF(p.aciertos + p.fallos), 0))::numeric, 1)::float, 0) as promedio_inspecciones
       FROM jugadores j
       INNER JOIN partidas p ON j.id = p.jugador_id
     `);

@@ -58,6 +58,14 @@
       </div>
       <div class="kpi-glow"></div>
     </div>
+    <div class="kpi-card kpi-highlight" id="kpi-puntos-totales">
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-body">
+        <div class="kpi-num" id="stat-puntos-totales">--</div>
+        <div class="kpi-label">PUNTOS TOTALES</div>
+      </div>
+      <div class="kpi-glow"></div>
+    </div>
     <div class="kpi-card" id="kpi-promedio">
       <div class="kpi-icon">📈</div>
       <div class="kpi-body">
@@ -66,7 +74,7 @@
       </div>
       <div class="kpi-glow"></div>
     </div>
-    <div class="kpi-card kpi-highlight" id="kpi-maxima">
+    <div class="kpi-card" id="kpi-maxima">
       <div class="kpi-icon">🏆</div>
       <div class="kpi-body">
         <div class="kpi-num" id="stat-maxima">--</div>
@@ -103,7 +111,8 @@
           <h2 class="panel-title">RANKING TOP 20</h2>
         </div>
         <div class="ranking-tabs" id="ranking-tabs">
-          <button class="tab-btn active" data-orden="mejor_puntuacion">MEJOR</button>
+          <button class="tab-btn active" data-orden="total_puntos">TOTAL</button>
+          <button class="tab-btn" data-orden="mejor_puntuacion">MEJOR</button>
           <button class="tab-btn" data-orden="promedio_puntuacion">PROMEDIO</button>
           <button class="tab-btn" data-orden="precision_pct">PRECISIÓN</button>
         </div>

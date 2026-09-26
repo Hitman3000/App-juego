@@ -182,6 +182,37 @@ body {
   flex-shrink: 0;
 }
 
+.btn-hud-inspector {
+  pointer-events: auto;
+  background: rgba(30, 20, 12, 0.9);
+  border: 1px solid #7c582c;
+  color: #f0c860;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.btn-hud-inspector:hover {
+  background: #3d2a17;
+  border-color: #d49e42;
+  color: #fff;
+}
+
+.btn-hud-inspector:active {
+  transform: scale(0.96);
+}
+
 #info-score {
   font-family: 'VT323', monospace;
   font-size: 15px;

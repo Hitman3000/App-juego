@@ -6,7 +6,7 @@ const API = (window.location.origin && window.location.origin.includes('onrender
     ? `${window.location.origin}/api`
     : RENDER_API;
 let rankingData = [];
-let ordenActual = 'mejor_puntuacion';
+let ordenActual = 'total_puntos';
 let apiDisponible = false;
 
 /* ============================================================
@@ -70,6 +70,7 @@ async function verificarAPI() {
    ANIMACIÓN DE CONTADOR
    ============================================================ */
 function animarContador(el, destino, sufijo = '', duracion = 800) {
+  if (!el) return;
   if (destino === '--' || destino === null || destino === undefined) {
     el.textContent = '--';
     return;
@@ -116,10 +117,12 @@ async function cargarEstadisticas() {
 
     animarContador(document.getElementById('stat-jugadores'), s.total_jugadores || 0);
     animarContador(document.getElementById('stat-partidas'), s.total_partidas || 0);
+    animarContador(document.getElementById('stat-puntos-totales'), hayDatos ? (s.total_puntos_global || 0) : '--');
     animarContador(document.getElementById('stat-promedio'), hayDatos ? s.promedio_puntuacion : '--');
     animarContador(document.getElementById('stat-maxima'), hayDatos ? s.puntuacion_maxima : '--');
     animarContador(document.getElementById('stat-precision'), hayDatos ? s.precision_global : '--', '%');
-    document.getElementById('stat-inspecciones').textContent = hayDatos ? (fmt(s.promedio_inspecciones) + '/doc') : '--';
+    const elInsp = document.getElementById('stat-inspecciones');
+    if (elInsp) elInsp.textContent = hayDatos ? (fmt(s.promedio_inspecciones) + '/doc') : '--';
 
     renderNiveles(data.distribucion_niveles || []);
     marcarUltimaActualizacion();
@@ -159,6 +162,7 @@ function renderRanking() {
   }
 
   const sorted = [...rankingData].sort((a, b) => {
+    if (ordenActual === 'total_puntos') return (b.total_puntos || 0) - (a.total_puntos || 0) || (b.mejor_puntuacion || 0) - (a.mejor_puntuacion || 0);
     if (ordenActual === 'precision_pct') return (b.precision_pct || 0) - (a.precision_pct || 0);
     if (ordenActual === 'promedio_puntuacion') return (b.promedio_puntuacion || 0) - (a.promedio_puntuacion || 0);
     return (b.mejor_puntuacion || 0) - (a.mejor_puntuacion || 0);
@@ -168,6 +172,7 @@ function renderRanking() {
     <thead><tr>
       <th>#</th>
       <th>Jugador</th>
+      <th style="color: #f0c860;">Total Pts</th>
       <th>Mejor</th>
       <th>Prom.</th>
       <th>Nivel</th>
@@ -188,6 +193,7 @@ function renderRanking() {
     const pct = r.precision_pct !== null && r.precision_pct !== undefined ? Number(r.precision_pct) : 0;
     const fillClass = pct >= 70 ? '' : pct >= 45 ? 'mid' : 'low';
     const pctText = r.precision_pct !== null ? pct + '%' : '--';
+    const totalPts = r.total_puntos !== null && r.total_puntos !== undefined ? r.total_puntos + ' pts' : (r.mejor_puntuacion ? r.mejor_puntuacion + ' pts' : '--');
     const mejor = r.mejor_puntuacion !== null ? r.mejor_puntuacion + ' pts' : '--';
     const prom = r.promedio_puntuacion !== null ? r.promedio_puntuacion + ' pts' : '--';
     const insp = r.promedio_inspecciones !== null && r.promedio_inspecciones !== undefined ? r.promedio_inspecciones + '/doc' : '--';
@@ -195,6 +201,7 @@ function renderRanking() {
     html += `<tr class="${rowClass}">
       <td class="${posClass}">${medal}</td>
       <td class="nombre-jugador">${escapeHtml(r.nombre)}</td>
+      <td style="font-weight: bold; color: #4ade80;">${totalPts}</td>
       <td>${mejor}</td>
       <td>${prom}</td>
       <td><span class="nivel-badge">Nv ${r.mejor_nivel || 1}</span></td>
@@ -219,7 +226,10 @@ function renderRanking() {
 function renderPodio() {
   const container = document.getElementById('podio-container');
 
-  const sorted = [...rankingData].sort((a, b) => (b.mejor_puntuacion || 0) - (a.mejor_puntuacion || 0));
+  const sorted = [...rankingData].sort((a, b) => {
+    if (ordenActual === 'total_puntos') return (b.total_puntos || 0) - (a.total_puntos || 0);
+    return (b.mejor_puntuacion || 0) - (a.mejor_puntuacion || 0);
+  });
   const top = sorted.slice(0, Math.min(sorted.length, 6));
 
   if (top.length === 0) {
@@ -233,13 +243,14 @@ function renderPodio() {
   container.innerHTML = top.map((r, i) => {
     const estilo = estilos[i] || '';
     const medalla = medallas[i] || (i + 1);
+    const puntosMostrar = (r.total_puntos !== undefined && r.total_puntos !== null) ? r.total_puntos : (r.mejor_puntuacion || 0);
     return `<div class="podio-card ${estilo}">
       <div class="podio-pos">${medalla}</div>
       <div class="podio-info">
         <div class="podio-nombre">${escapeHtml(r.nombre)}</div>
-        <div class="podio-meta">Nv${r.mejor_nivel || 1} · ${r.total_partidas || 0} partidas · ${r.precision_pct || 0}% prec.</div>
+        <div class="podio-meta">Nv${r.mejor_nivel || 1} · ${r.total_partidas || 0} partidas · Récord: ${r.mejor_puntuacion || 0} pts</div>
       </div>
-      <div class="podio-pts">${r.mejor_puntuacion || 0}</div>
+      <div class="podio-pts">${puntosMostrar}</div>
     </div>`;
   }).join('');
 }

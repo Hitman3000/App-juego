@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Portero</string>
-    <string name="title_activity_main">Portero</string>
+    <string name="app_name">Logic Play</string>
+    <string name="title_activity_main">Logic Play</string>
     <string name="package_name">com.mijuego.portero</string>
     <string name="custom_url_scheme">com.mijuego.portero</string>
 </resources>

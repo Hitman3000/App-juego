@@ -20,6 +20,10 @@ function comenzarNivel(nivel) {
   estado.indice = 0;
   estado.ocupado = false;
   
+  try {
+    localStorage.setItem('ddd_nivel_actual', estado.dia);
+  } catch (e) {}
+
   reiniciarHistorialCasos(estado.dia);
 
   if (nivel === 1 || !sesion.inicio) {
@@ -59,6 +63,9 @@ function finDeNivel() {
     );
   } else {
     const siguiente = estado.dia + 1;
+    try {
+      localStorage.setItem('ddd_nivel_actual', siguiente);
+    } catch (e) {}
     mostrarFelicitacionNivel(siguiente, () => comenzarNivel(siguiente));
   }
 }
@@ -123,6 +130,7 @@ function decidir(accionBoton) {
     if (typeof AudioJuego !== "undefined") AudioJuego.moneda();
 
     renderCabecera(estado.dia, estado.aciertos, CONFIG.CASOS_POR_NIVEL, estado.vidas, estado.puntos);
+    syncStatsDebounced();
 
     mostrarModalFeedback(
       true,
@@ -138,6 +146,7 @@ function decidir(accionBoton) {
     estado.puntos = Math.max(0, estado.puntos - CONFIG.PUNTOS_ERROR);
 
     renderCabecera(estado.dia, estado.aciertos, CONFIG.CASOS_POR_NIVEL, estado.vidas, estado.puntos);
+    syncStatsDebounced();
 
     dispararAlarma(() => {
       mostrarModalFeedback(
@@ -157,6 +166,9 @@ function reiniciar() {
   estado.puntos = 0;
   estado.visitas = [];
   estado.aciertos = 0;
+  if (typeof SyncManager !== 'undefined') {
+    SyncManager.nuevaSesion();
+  }
   comenzarNivel(1);
 }
 
@@ -213,6 +225,14 @@ mostrarInicio((nivelElegido) => {
   comenzarNivel(nivelElegido || 1);
 });
 
+let timerSyncDebounce = null;
+function syncStatsDebounced() {
+  if (timerSyncDebounce) clearTimeout(timerSyncDebounce);
+  timerSyncDebounce = setTimeout(() => {
+    syncStats();
+  }, 1200);
+}
+
 function syncStats() {
   const tiempoJugado = Math.floor((Date.now() - (sesion.inicio || Date.now())) / 1000);
   const inspecciones = inspeccionesDoc;
@@ -228,3 +248,16 @@ function syncStats() {
     });
   }
 }
+
+// Sincronizar si el jugador minimiza o cierra la app
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && estado.puntos > 0) {
+    syncStats();
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  if (estado.puntos > 0) {
+    syncStats();
+  }
+});
